@@ -212,4 +212,16 @@ Use Wayfinder to generate TypeScript functions for Laravel routes. Import from `
 
 - To change the port from which the server is run, prepend the command with `SERVER_PORT=xxxx` and `APP_URL=http://localhost:xxxx`. Example: `SERVER_PORT=8001 APP_URL=http://localhost:8001 composer run dev`
 
+# REFERENCE MODULE — Notes (Herman quality bar)
+
+This starter ships a polished **Notes** CRUD example so Herman's wizard has a concrete quality bar (list → detail → create/edit, markdown editor, empty states, delete confirm, team scoping, Pest coverage).
+
+**If the product does not need Notes, delete the whole module and this section of this file** — do not leave half of it behind:
+
+- Backend: `app/Models/Note.php`, `app/Policies/NotePolicy.php`, `app/Http/Controllers/Notes/`, `app/Http/Requests/Notes/`, migration `*_create_notes_table.php`, `database/factories/NoteFactory.php`, Notes seed block in `DatabaseSeeder`, `Route::resource('notes', …)` in `routes/web.php`, `Team::notes()`, `tests/Feature/Notes/`
+- Frontend: `resources/js/pages/notes/`, `resources/js/components/notes/`, Notes item in `app-sidebar.tsx`
+- Optional deps only used by Notes: `@uiw/react-md-editor`, `react-markdown`
+
+Files are marked with `REFERENCE MODULE` comments so they are easy to find.
+
 </other-guidelines>

@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Globe, LayoutGrid } from 'lucide-react';
+import { Globe, LayoutGrid, NotebookPen } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -15,6 +15,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard, home } from '@/routes';
+import { index as notesIndex } from '@/routes/notes';
 import type { NavItem } from '@/types';
 
 export function AppSidebar() {
@@ -22,6 +23,10 @@ export function AppSidebar() {
     const dashboardUrl = page.props.currentTeam
         ? dashboard(page.props.currentTeam.slug)
         : '/';
+    // REFERENCE MODULE — Notes nav entry. Remove with the Notes feature when unused.
+    const notesUrl = page.props.currentTeam
+        ? notesIndex(page.props.currentTeam.slug)
+        : null;
 
     const mainNavItems: NavItem[] = [
         {
@@ -29,6 +34,15 @@ export function AppSidebar() {
             href: dashboardUrl,
             icon: LayoutGrid,
         },
+        ...(notesUrl
+            ? [
+                  {
+                      title: 'Notes',
+                      href: notesUrl,
+                      icon: NotebookPen,
+                  },
+              ]
+            : []),
     ];
 
     const footerNavItems: NavItem[] = [
