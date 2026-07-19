@@ -1,13 +1,23 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/react-starter-kit",
+    "name": "hommesauvage/herman-starter-laravel",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Herman Laravel Starter — multi-tenant teams, Fortify auth, Inertia React, and a Notes quality-bar CRUD.",
     "keywords": [
         "laravel",
-        "framework"
+        "inertia",
+        "react",
+        "starter",
+        "teams",
+        "saas"
     ],
     "license": "MIT",
+    "authors": [
+        {
+            "name": "Aladdin Bouzerd",
+            "homepage": "https://github.com/HommeSauvage"
+        }
+    ],
     "require": {
         "php": "^8.3",
         "inertiajs/inertia-laravel": "^3.0",
