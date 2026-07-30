@@ -1,6 +1,7 @@
-import { Form, Head } from '@inertiajs/react';
+import { Form } from '@inertiajs/react';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
+import Seo from '@/components/seo';
 import TeamInvitationAlert from '@/components/team-invitation-alert';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
@@ -19,7 +20,7 @@ type Props = {
 export default function Register({ passwordRules, teamInvitation }: Props) {
     return (
         <>
-            <Head title="Register" />
+            <Seo title="Register" />
             <Form
                 {...store.form()}
                 resetOnSuccess={['password', 'password_confirmation']}

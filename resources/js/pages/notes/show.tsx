@@ -1,7 +1,8 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { Pencil } from 'lucide-react';
 import DeleteNoteDialog from '@/components/notes/delete-note-dialog';
 import MarkdownBody from '@/components/notes/markdown-body';
+import Seo from '@/components/seo';
 import { Button } from '@/components/ui/button';
 import { edit, index as notesIndex, show } from '@/routes/notes';
 
@@ -23,7 +24,7 @@ export default function NotesShow({ note }: { note: Note }) {
 
     return (
         <>
-            <Head title={note.title} />
+            <Seo title={note.title} />
 
             <article className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-4 md:p-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -47,10 +48,7 @@ export default function NotesShow({ note }: { note: Note }) {
                                 </Link>
                             </Button>
                         ) : null}
-                        <DeleteNoteDialog
-                            noteId={note.id}
-                            title={note.title}
-                        />
+                        <DeleteNoteDialog noteId={note.id} title={note.title} />
                     </div>
                 </div>
 

@@ -1,4 +1,4 @@
-import { Form, Head } from '@inertiajs/react';
+import { Form } from '@inertiajs/react';
 import {
     index as confirmOptions,
     store as confirmStore,
@@ -6,6 +6,7 @@ import {
 import InputError from '@/components/input-error';
 import PasskeyVerify from '@/components/passkey-verify';
 import PasswordInput from '@/components/password-input';
+import Seo from '@/components/seo';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
@@ -14,7 +15,7 @@ import { store } from '@/routes/password/confirm';
 export default function ConfirmPassword() {
     return (
         <>
-            <Head title="Confirm password" />
+            <Seo title="Confirm password" />
 
             <PasskeyVerify
                 routes={{

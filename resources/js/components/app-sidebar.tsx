@@ -1,5 +1,4 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Globe, LayoutGrid, NotebookPen } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -14,44 +13,15 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard, home } from '@/routes';
-import { index as notesIndex } from '@/routes/notes';
-import type { NavItem } from '@/types';
+import { appFooterNav, appNav } from '@/lib/nav';
+import { dashboard } from '@/routes';
 
 export function AppSidebar() {
     const page = usePage();
-    const dashboardUrl = page.props.currentTeam
-        ? dashboard(page.props.currentTeam.slug)
-        : '/';
-    // REFERENCE MODULE — Notes nav entry. Remove with the Notes feature when unused.
-    const notesUrl = page.props.currentTeam
-        ? notesIndex(page.props.currentTeam.slug)
-        : null;
+    const teamSlug = page.props.currentTeam?.slug ?? null;
+    const dashboardUrl = teamSlug ? dashboard(teamSlug) : '/';
 
-    const mainNavItems: NavItem[] = [
-        {
-            title: 'Dashboard',
-            href: dashboardUrl,
-            icon: LayoutGrid,
-        },
-        ...(notesUrl
-            ? [
-                  {
-                      title: 'Notes',
-                      href: notesUrl,
-                      icon: NotebookPen,
-                  },
-              ]
-            : []),
-    ];
-
-    const footerNavItems: NavItem[] = [
-        {
-            title: 'Open website',
-            href: home(),
-            icon: Globe,
-        },
-    ];
+    const mainNavItems = appNav(teamSlug);
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -78,7 +48,7 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
+                <NavFooter items={appFooterNav} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

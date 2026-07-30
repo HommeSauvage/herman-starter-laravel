@@ -23,7 +23,7 @@ class NoteFactory extends Factory
     {
         return [
             'title' => fake()->sentence(4),
-            'body' => '## '.fake()->words(3, true)."\n\n".fake()->paragraphs(2, true),
+            'body' => '## '.fake()->sentence(3)."\n\n".fake()->paragraph()."\n\n".fake()->paragraph(),
         ];
     }
 
@@ -51,7 +51,7 @@ class NoteFactory extends Factory
     {
         return $this->state(fn () => [
             'team_id' => $team->id,
-            'user_id' => $author?->id ?? $team->owner()?->id,
+            'user_id' => $author->id ?? $team->owner()?->id,
         ]);
     }
 }

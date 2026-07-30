@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\TeamRole;
+use App\Models\Note;
 use App\Models\Team;
 use App\Models\TeamInvitation;
 use App\Models\User;
@@ -132,4 +133,43 @@ test('dashboard does not include or delete other users invitations', function ()
     $this->assertDatabaseHas('team_invitations', [
         'id' => $invitation->id,
     ]);
+});
+test('dashboard includes real counts and recent notes for the current team', function () {
+    $user = User::factory()->create();
+    $team = $user->currentTeam;
+
+    Note::factory()->forTeam($team, $user)->count(2)->create();
+    Note::factory()->count(3)->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->get(route('dashboard', ['current_team' => $team->slug]));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('dashboard')
+        ->where('stats.members', 1)
+        ->where('stats.notes', 2)
+        ->where('stats.pendingInvitations', 0)
+        ->has('recentNotes', 2)
+        ->where('recentNotes.0.author', $user->name),
+    );
+});
+
+test('dashboard recent notes are limited to five and ordered by latest', function () {
+    $user = User::factory()->create();
+    $team = $user->currentTeam;
+
+    Note::factory()->forTeam($team, $user)->count(7)->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->get(route('dashboard', ['current_team' => $team->slug]));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('dashboard')
+        ->where('stats.notes', 7)
+        ->has('recentNotes', 5),
+    );
 });

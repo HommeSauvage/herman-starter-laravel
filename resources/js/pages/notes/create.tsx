@@ -1,9 +1,10 @@
-import { Form, Head, Link, usePage } from '@inertiajs/react';
+import { Form, Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import NoteController from '@/actions/App/Http/Controllers/Notes/NoteController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import MarkdownEditor from '@/components/notes/markdown-editor';
+import Seo from '@/components/seo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,7 +22,7 @@ export default function NotesCreate() {
 
     return (
         <>
-            <Head title="New note" />
+            <Seo title="New note" />
 
             <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-4 md:p-6">
                 <Heading
@@ -85,9 +86,7 @@ export default function NotesCreate() {
     );
 }
 
-NotesCreate.layout = (props: {
-    currentTeam?: { slug: string } | null;
-}) => ({
+NotesCreate.layout = (props: { currentTeam?: { slug: string } | null }) => ({
     breadcrumbs: [
         {
             title: 'Notes',

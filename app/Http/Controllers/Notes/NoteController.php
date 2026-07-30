@@ -39,7 +39,7 @@ class NoteController extends Controller
                 'id' => $note->id,
                 'title' => $note->title,
                 'excerpt' => str($note->body)->stripTags()->limit(140)->toString(),
-                'author' => $note->user?->name,
+                'author' => $note->user->name,
                 'updated_at' => $note->updated_at?->toIso8601String(),
             ]);
 
@@ -95,7 +95,7 @@ class NoteController extends Controller
                 'id' => $note->id,
                 'title' => $note->title,
                 'body' => $note->body,
-                'author' => $note->user?->name,
+                'author' => $note->user->name,
                 'created_at' => $note->created_at?->toIso8601String(),
                 'updated_at' => $note->updated_at?->toIso8601String(),
             ],

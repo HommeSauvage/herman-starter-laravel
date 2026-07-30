@@ -8,6 +8,8 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -29,4 +31,23 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+
+        // Render friendly Inertia error pages while keeping HTTP status codes
+        // intact (Herman's QA gate probes a canary 404 path). Server errors
+        // still surface as real exceptions in local/testing for debugging.
+        $exceptions->respond(function (Response $response, Throwable $exception, Request $request) {
+            $status = $response->getStatusCode();
+
+            if ($request->expectsJson() || ! in_array($status, [403, 404, 500, 503])) {
+                return $response;
+            }
+
+            if ($status >= 500 && app()->environment(['local', 'testing'])) {
+                return $response;
+            }
+
+            return Inertia::render('error', ['status' => $status])
+                ->toResponse($request)
+                ->setStatusCode($status);
+        });
     })->create();

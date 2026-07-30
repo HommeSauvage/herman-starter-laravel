@@ -1,7 +1,8 @@
-import { Form, Head } from '@inertiajs/react';
+import { Form } from '@inertiajs/react';
 import InputError from '@/components/input-error';
 import PasskeyVerify from '@/components/passkey-verify';
 import PasswordInput from '@/components/password-input';
+import Seo from '@/components/seo';
 import TeamInvitationAlert from '@/components/team-invitation-alert';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
@@ -27,7 +28,7 @@ export default function Login({
 }: Props) {
     return (
         <>
-            <Head title="Log in" />
+            <Seo title="Log in" />
 
             {teamInvitation && (
                 <TeamInvitationAlert

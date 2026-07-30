@@ -1,12 +1,12 @@
-import { Head } from '@inertiajs/react';
 import AppearanceTabs from '@/components/appearance-tabs';
 import Heading from '@/components/heading';
+import Seo from '@/components/seo';
 import { edit as editAppearance } from '@/routes/appearance';
 
 export default function Appearance() {
     return (
         <>
-            <Head title="Appearance settings" />
+            <Seo title="Appearance settings" />
 
             <h1 className="sr-only">Appearance settings</h1>
 

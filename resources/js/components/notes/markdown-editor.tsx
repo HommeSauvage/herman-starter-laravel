@@ -21,7 +21,10 @@ export default function MarkdownEditor({
     const colorMode = resolvedAppearance;
 
     return (
-        <div data-color-mode={colorMode} className="overflow-hidden rounded-lg border">
+        <div
+            data-color-mode={colorMode}
+            className="overflow-hidden rounded-lg border"
+        >
             <input type="hidden" name={name} value={value} />
             <MDEditor
                 id={id}
