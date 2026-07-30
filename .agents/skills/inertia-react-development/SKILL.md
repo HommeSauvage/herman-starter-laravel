@@ -10,515 +10,106 @@ metadata:
 
 ## When to Apply
 
-Activate this skill when:
-
 - Creating or modifying React page components for Inertia
-- Working with forms in React (using `<Form>`, `useForm`, or `useHttp`)
-- Implementing client-side navigation with `<Link>` or `router`
-- Using v3 features: deferred props, prefetching, optimistic updates, instant visits, layout props, HTTP requests, WhenVisible, InfiniteScroll, once props, flash data, or polling
-- Building React-specific features with the Inertia protocol
+- Forms in React (`<Form>`, `useForm`, `useHttp`)
+- Client-side navigation with `<Link>` or `router`
+- v3 features: deferred props, prefetching, optimistic updates, instant visits, layout props, WhenVisible, InfiniteScroll, once props, flash data, polling
 
-## Documentation
+Use `search-docs` for detailed Inertia v3 syntax. This file covers this starter's conventions and the v3 feature map.
 
-Use `search-docs` for detailed Inertia v3 React patterns and documentation.
+## Starter Conventions (override generic Inertia examples)
 
-## Basic Usage
+1. **Never hardcode URLs.** Every `href`, `action`, and `router`/`useForm` target comes from Wayfinder: default-import the controller from `@/actions/...` or use named routes from `@/routes/...`. After route changes run `php artisan wayfinder:generate --with-form`.
+2. **Compose `components/ui/*`.** Forms use `Input`, `Label`, `Button`, and `InputError` (`@/components/input-error`) — never raw styled `<input>`/`<button>`. Never edit the `ui/*` primitives themselves.
+3. **Token colors only.** Skeletons use the `<Skeleton />` component (`ui/skeleton`) or `bg-muted` — never palette classes like `bg-gray-200`.
+4. **Pages live in `resources/js/pages/`** — `pages/public/**` gets `PublicLayout`, everything else `AppLayout` (resolver in `app.tsx`). Every page renders `<Seo title … />` (never raw `<Head>` titles). Pages can export `Page.layout = (props) => ({ breadcrumbs: [...] })` for the app layout.
+5. **Loading states:** deferred props → skeleton, form submits → the form's `processing` state, everything else → spinner (`components/loading-state.tsx`).
+6. **List pages compose** `empty-state.tsx`, `pagination.tsx`, `search-input.tsx` — reference: `pages/notes/index.tsx`.
 
-### Page Components Location
+## Canonical Form (starter style)
 
-React page components should be placed in the `resources/js/pages` directory.
+```tsx
+import { Form } from '@inertiajs/react';
+import NoteController from '@/actions/App/Http/Controllers/Notes/NoteController';
+import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
-### Page Component Structure
-
-<!-- Basic React Page Component -->
-```react
-export default function UsersIndex({ users }) {
+export default function CreateNote() {
     return (
-        <div>
-            <h1>Users</h1>
-            <ul>
-                {users.map(user => <li key={user.id}>{user.name}</li>)}
-            </ul>
-        </div>
-    )
-}
-```
-
-## Client-Side Navigation
-
-### Basic Link Component
-
-Use `<Link>` for client-side navigation instead of traditional `<a>` tags:
-
-<!-- Inertia React Navigation -->
-```react
-import { Link, router } from '@inertiajs/react'
-
-<Link href="/">Home</Link>
-<Link href="/users">Users</Link>
-<Link href={`/users/${user.id}`}>View User</Link>
-```
-
-### Link with Method
-
-<!-- Link with POST Method -->
-```react
-import { Link } from '@inertiajs/react'
-
-<Link href="/logout" method="post" as="button">
-    Logout
-</Link>
-```
-
-### Prefetching
-
-Prefetch pages to improve perceived performance:
-
-<!-- Prefetch on Hover -->
-```react
-import { Link } from '@inertiajs/react'
-
-<Link href="/users" prefetch>
-    Users
-</Link>
-```
-
-### Programmatic Navigation
-
-<!-- Router Visit -->
-```react
-import { router } from '@inertiajs/react'
-
-function handleClick() {
-    router.visit('/users')
-}
-
-// Or with options
-router.visit('/users', {
-    method: 'post',
-    data: { name: 'John' },
-    onSuccess: () => console.log('Success!'),
-})
-```
-
-## Form Handling
-
-### Form Component (Recommended)
-
-The recommended way to build forms is with the `<Form>` component:
-
-<!-- Form Component Example -->
-```react
-import { Form } from '@inertiajs/react'
-
-export default function CreateUser() {
-    return (
-        <Form action="/users" method="post">
-            {({ errors, processing, wasSuccessful }) => (
+        <Form {...NoteController.store.form()} className="flex flex-col gap-6">
+            {({ processing, errors }) => (
                 <>
-                    <input type="text" name="name" />
-                    {errors.name && <div>{errors.name}</div>}
-
-                    <input type="email" name="email" />
-                    {errors.email && <div>{errors.email}</div>}
-
-                    <button type="submit" disabled={processing}>
-                        {processing ? 'Creating...' : 'Create User'}
-                    </button>
-
-                    {wasSuccessful && <div>User created!</div>}
+                    <div className="grid gap-2">
+                        <Label htmlFor="title">Title</Label>
+                        <Input id="title" name="title" required />
+                        <InputError message={errors.title} />
+                    </div>
+                    <Button type="submit" disabled={processing}>
+                        {processing ? 'Saving…' : 'Save'}
+                    </Button>
                 </>
             )}
         </Form>
-    )
+    );
 }
 ```
 
-### Form Component With All Props
+- Route parameters go into the Wayfinder call: `NoteController.store.form(teamSlug)`.
+- Prefer `<Form>` for standard submits. Reset props: `resetOnSuccess`, `resetOnError`, `setDefaultsOnSuccess` (`search-docs`: `form component resetting`).
+- Use `useForm` for programmatic control (controlled inputs, dependent fields). Use `useHttp` for plain JSON endpoints that are not page visits (search boxes, autosave).
 
-<!-- Form Component Full Example -->
-```react
-import { Form } from '@inertiajs/react'
+## Deferred Props
 
-<Form action="/users" method="post">
-    {({
-        errors,
-        hasErrors,
-        processing,
-        progress,
-        wasSuccessful,
-        recentlySuccessful,
-        clearErrors,
-        resetAndClearErrors,
-        defaults,
-        isDirty,
-        reset,
-        submit
-    }) => (
-        <>
-            <input type="text" name="name" defaultValue={defaults.name} />
-            {errors.name && <div>{errors.name}</div>}
+Server: `Inertia::defer(fn () => …)`. The prop is `undefined` on first render — always handle it with a skeleton:
 
-            <button type="submit" disabled={processing}>
-                {processing ? 'Saving...' : 'Save'}
-            </button>
+```tsx
+import { Skeleton } from '@/components/ui/skeleton';
 
-            {progress && (
-                <progress value={progress.percentage} max="100">
-                    {progress.percentage}%
-                </progress>
-            )}
-
-            {wasSuccessful && <div>Saved!</div>}
-        </>
-    )}
-</Form>
-```
-
-### Form Component Reset Props
-
-The `<Form>` component supports automatic resetting:
-
-- `resetOnError` - Reset form data when the request fails
-- `resetOnSuccess` - Reset form data when the request succeeds
-- `setDefaultsOnSuccess` - Update default values on success
-
-Use the `search-docs` tool with a query of `form component resetting` for detailed guidance.
-
-<!-- Form with Reset Props -->
-```react
-import { Form } from '@inertiajs/react'
-
-<Form
-    action="/users"
-    method="post"
-    resetOnSuccess
-    setDefaultsOnSuccess
->
-    {({ errors, processing, wasSuccessful }) => (
-        <>
-            <input type="text" name="name" />
-            {errors.name && <div>{errors.name}</div>}
-
-            <button type="submit" disabled={processing}>
-                Submit
-            </button>
-        </>
-    )}
-</Form>
-```
-
-Forms can also be built using the `useForm` helper for more programmatic control. Use the `search-docs` tool with a query of `useForm helper` for guidance.
-
-### `useForm` Hook
-
-For more programmatic control or to follow existing conventions, use the `useForm` hook:
-
-<!-- useForm Hook Example -->
-```react
-import { useForm } from '@inertiajs/react'
-
-export default function CreateUser() {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        name: '',
-        email: '',
-        password: '',
-    })
-
-    function submit(e) {
-        e.preventDefault()
-        post('/users', {
-            onSuccess: () => reset('password'),
-        })
-    }
-
-    return (
-        <form onSubmit={submit}>
-            <input
-                type="text"
-                value={data.name}
-                onChange={e => setData('name', e.target.value)}
-            />
-            {errors.name && <div>{errors.name}</div>}
-
-            <input
-                type="email"
-                value={data.email}
-                onChange={e => setData('email', e.target.value)}
-            />
-            {errors.email && <div>{errors.email}</div>}
-
-            <input
-                type="password"
-                value={data.password}
-                onChange={e => setData('password', e.target.value)}
-            />
-            {errors.password && <div>{errors.password}</div>}
-
-            <button type="submit" disabled={processing}>
-                Create User
-            </button>
-        </form>
-    )
-}
-```
-
-## Inertia v3 Features
-
-### HTTP Requests
-
-Use the `useHttp` hook for standalone HTTP requests that do not trigger Inertia page visits. It provides the same developer experience as `useForm`, but for plain JSON endpoints.
-
-<!-- useHttp Example -->
-```react
-import { useHttp } from '@inertiajs/react'
-
-export default function Search() {
-    const { data, setData, get, processing } = useHttp({
-        query: '',
-    })
-
-    function search(e) {
-        setData('query', e.target.value)
-        get('/api/search', {
-            onSuccess: (response) => {
-                console.log(response)
-            },
-        })
-    }
-
-    return (
-        <>
-            <input value={data.query} onChange={search} />
-            {processing && <div>Searching...</div>}
-        </>
-    )
-}
-```
-
-### Optimistic Updates
-
-Apply data changes instantly before the server responds, with automatic rollback on failure:
-
-<!-- Optimistic Update with Router -->
-```react
-import { router } from '@inertiajs/react'
-
-function like(post) {
-    router.optimistic((props) => ({
-        post: {
-            ...props.post,
-            likes: props.post.likes + 1,
-        },
-    })).post(`/posts/${post.id}/like`)
-}
-```
-
-Optimistic updates also work with `useForm` and the `<Form>` component:
-
-<!-- Optimistic Update with Form Component -->
-```react
-import { Form } from '@inertiajs/react'
-
-<Form
-    action="/todos"
-    method="post"
-    optimistic={(props, data) => ({
-        todos: [...props.todos, { id: Date.now(), name: data.name, done: false }],
-    })}
->
-    <input type="text" name="name" />
-    <button type="submit">Add Todo</button>
-</Form>
-```
-
-### Instant Visits
-
-Navigate to a new page immediately without waiting for the server response. The target component renders right away with shared props, while page-specific props load in the background.
-
-<!-- Instant Visit with Link -->
-```react
-import { Link } from '@inertiajs/react'
-
-<Link href="/dashboard" component="Dashboard">Dashboard</Link>
-
-<Link
-    href="/posts/1"
-    component="Posts/Show"
-    pageProps={{ post: { id: 1, title: 'My Post' } }}
->
-    View Post
-</Link>
-```
-
-### Layout Props
-
-Share dynamic data between pages and persistent layouts:
-
-<!-- Layout Props in Layout -->
-```react
-export default function Layout({ title = 'My App', showSidebar = true, children }) {
-    return (
-        <>
-            <header>{title}</header>
-            {showSidebar && <aside>Sidebar</aside>}
-            <main>{children}</main>
-        </>
-    )
-}
-```
-
-<!-- Setting Layout Props from Page -->
-```react
-import { setLayoutProps } from '@inertiajs/react'
-
-export default function Dashboard() {
-    setLayoutProps({
-        title: 'Dashboard',
-        showSidebar: false,
-    })
-
-    return <h1>Dashboard</h1>
-}
-```
-
-### Deferred Props
-
-Use deferred props to load data after initial page render:
-
-<!-- Deferred Props with Empty State -->
-```react
-export default function UsersIndex({ users }) {
-    return (
-        <div>
-            <h1>Users</h1>
-            {!users ? (
-                <div className="animate-pulse">
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                </div>
-            ) : (
-                <ul>
-                    {users.map(user => (
-                        <li key={user.id}>{user.name}</li>
-                    ))}
-                </ul>
-            )}
+{
+    !users ? (
+        <div className="flex flex-col gap-2">
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
         </div>
-    )
-}
-```
-
-### Polling
-
-Use the `usePoll` hook to automatically refresh data at intervals. It handles cleanup on unmount and throttles polling when the tab is inactive.
-
-<!-- Basic Polling -->
-```react
-import { usePoll } from '@inertiajs/react'
-
-export default function Dashboard({ stats }) {
-    usePoll(5000)
-
-    return (
-        <div>
-            <h1>Dashboard</h1>
-            <div>Active Users: {stats.activeUsers}</div>
-        </div>
-    )
-}
-```
-
-<!-- Polling With Request Options and Manual Control -->
-```react
-import { usePoll } from '@inertiajs/react'
-
-export default function Dashboard({ stats }) {
-    const { start, stop } = usePoll(5000, {
-        only: ['stats'],
-        onStart() {
-            console.log('Polling request started')
-        },
-        onFinish() {
-            console.log('Polling request finished')
-        },
-    }, {
-        autoStart: false,
-        keepAlive: true,
-    })
-
-    return (
-        <div>
-            <h1>Dashboard</h1>
-            <div>Active Users: {stats.activeUsers}</div>
-            <button onClick={start}>Start Polling</button>
-            <button onClick={stop}>Stop Polling</button>
-        </div>
-    )
-}
-```
-
-- `autoStart` (default `true`) - set to `false` to start polling manually via the returned `start()` function
-- `keepAlive` (default `false`) - set to `true` to prevent throttling when the browser tab is inactive
-
-### WhenVisible
-
-Lazy-load a prop when an element scrolls into view. Useful for deferring expensive data that sits below the fold:
-
-<!-- WhenVisible Example -->
-```react
-import { WhenVisible } from '@inertiajs/react'
-
-export default function Dashboard({ stats }) {
-    return (
-        <div>
-            <h1>Dashboard</h1>
-
-            <WhenVisible data="stats" buffer={200} fallback={<div className="animate-pulse">Loading stats...</div>}>
-                {({ fetching }) => (
-                    <div>
-                        <p>Total Users: {stats.total_users}</p>
-                        <p>Revenue: {stats.revenue}</p>
-                        {fetching && <span>Refreshing...</span>}
-                    </div>
-                )}
-            </WhenVisible>
-        </div>
-    )
-}
-```
-
-### InfiniteScroll
-
-Automatically load additional pages of paginated data as users scroll:
-
-<!-- InfiniteScroll Example -->
-```react
-import { InfiniteScroll } from '@inertiajs/react'
-
-export default function Users({ users }) {
-    return (
-        <InfiniteScroll data="users">
-            {users.data.map(user => (
-                <div key={user.id}>{user.name}</div>
+    ) : (
+        <ul>
+            {users.map((user) => (
+                <li key={user.id}>{user.name}</li>
             ))}
-        </InfiniteScroll>
-    )
+        </ul>
+    );
 }
 ```
 
-The server must use `Inertia::scroll()` to configure the paginated data. Use the `search-docs` tool with a query of `infinite scroll` for detailed guidance on buffers, manual loading, reverse mode, and custom trigger elements.
+## v3 Feature Map
 
-## Server-Side Patterns
+Reach for these instead of hand-rolling. Syntax and options: `search-docs` (e.g. `optimistic updates`, `infinite scroll`).
 
-Server-side patterns (Inertia::render, props, middleware) are covered in inertia-laravel guidelines.
+| Feature                   | API                                       | Use when                                        |
+| ------------------------- | ----------------------------------------- | ----------------------------------------------- |
+| Standalone JSON requests  | `useHttp`                                 | Non-page-visit endpoints (search, autosave)     |
+| Optimistic updates        | `router.optimistic()`, `<Form optimistic>` | Instant UI with automatic rollback on failure   |
+| Instant visits            | `<Link component={…} pageProps={…}>`       | Render the target page before the server replies |
+| Layout props              | `setLayoutProps()`                         | Page → persistent layout data                   |
+| Deferred props            | `Inertia::defer()`                         | Slow props below the fold (always add skeleton) |
+| Prefetching               | `<Link prefetch>`                          | Likely next navigations                         |
+| Polling                   | `usePoll(ms, options)`                     | Live dashboards (throttles in inactive tabs)    |
+| Scroll lazy-load          | `<WhenVisible>`                            | Load a prop when it scrolls into view           |
+| Infinite scroll           | `<InfiniteScroll>` + `Inertia::scroll()`   | "Load more" feeds                               |
+| Merging props             | `Inertia::merge()`                         | Append instead of replace on reload             |
+| Once props                | `Inertia::once()`                          | Expensive props that never change               |
+
+## v3 Breaking Changes (vs older training data)
+
+- Axios removed — use the built-in XHR client. `Inertia::lazy()` / `LazyProp` removed — use `Inertia::optional()`.
+- Events renamed: `invalid` → `httpException`, `exception` → `networkError`. `router.cancel()` → `router.cancelAll()`.
 
 ## Common Pitfalls
 
-- Using traditional `<a>` links instead of Inertia's `<Link>` component (breaks SPA behavior)
-- Forgetting to add loading states (skeleton screens) when using deferred props
-- Not handling the `undefined` state of deferred props before data loads
-- Using `<form>` without preventing default submission (use `<Form>` component or `e.preventDefault()`)
-- Forgetting to check if `<Form>` component is available in your Inertia version
-- Using `router.cancel()` instead of `router.cancelAll()` (v3 breaking change)
-- Using `router.on('invalid', ...)` or `router.on('exception', ...)` instead of the renamed `httpException` and `networkError` events
+- Hardcoded URLs instead of Wayfinder functions (breaks this starter's routing contract)
+- `<a>` instead of `<Link>` (breaks SPA behavior)
+- Deferred props without `undefined` handling and a skeleton
+- Raw `<input>`/`<button>` or palette colors instead of `ui/*` components and tokens
+- Plain `<form>` without `<Form>` or `e.preventDefault()`
