@@ -1,7 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import { Pencil } from 'lucide-react';
+import MarkdownBody from '@/components/markdown-body';
 import DeleteNoteDialog from '@/components/notes/delete-note-dialog';
-import MarkdownBody from '@/components/notes/markdown-body';
 import Seo from '@/components/seo';
 import { Button } from '@/components/ui/button';
 import { edit, index as notesIndex, show } from '@/routes/notes';

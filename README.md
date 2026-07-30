@@ -51,9 +51,11 @@ Use it as the base for an AI-assisted product (or a traditional one) and start b
 - Lucide icons, Sonner toasts, light/dark appearance
 - SSR-capable Vite setup (`bun run build:ssr`)
 
-### Reference module: Notes
+### Reference modules: Notes & Posts
 
-A complete team-scoped Notes CRUD that demonstrates Herman’s quality bar:
+Two complete, tested examples set the quality bar — keep them as patterns or delete them in one pass.
+
+**Notes** — team-scoped app CRUD behind auth:
 
 | Concern        | Included                                      |
 |----------------|-----------------------------------------------|
@@ -62,7 +64,16 @@ A complete team-scoped Notes CRUD that demonstrates Herman’s quality bar:
 | UX             | Empty states, delete confirmation             |
 | Tests          | Pest feature coverage                         |
 
-**Don’t need Notes?** Delete the whole module — see [Removing the Notes module](#removing-the-notes-module). Files are tagged with `REFERENCE MODULE` comments.
+**Posts** — public read-side content (blog-style):
+
+| Concern        | Included                                          |
+|----------------|---------------------------------------------------|
+| Backend        | Model, `published()` scope, slug route binding    |
+| UI             | Public index (card grid) + show (markdown body)   |
+| UX             | SEO heads, empty states, 404 for unpublished      |
+| Tests          | Pest feature coverage                             |
+
+**Don’t need them?** Delete each module wholesale — see [Removing the Notes module](#removing-the-notes-module) and [Removing the Posts module](#removing-the-posts-module). Files are tagged with `REFERENCE MODULE` comments.
 
 ### Quality & tooling
 
@@ -150,23 +161,28 @@ SERVER_PORT=8001 APP_URL=http://localhost:8001 composer run dev
 ```
 app/
 ├── Http/Controllers/
-│   ├── Notes/              # REFERENCE MODULE
+│   ├── Notes/              # REFERENCE MODULE (app CRUD)
+│   ├── Public/             # REFERENCE MODULE (public content)
 │   ├── Settings/
 │   └── Teams/
-├── Models/                 # User, Team, Membership, Note, …
+├── Models/                 # User, Team, Membership, Note, Post, …
 ├── Policies/
 └── Enums/                  # TeamRole, TeamPermission
 
 resources/js/
-├── components/             # UI + feature components
-├── pages/                  # Inertia pages (auth, teams, notes, …)
-├── layouts/
+├── components/             # UI + feature + sections/ + shared state components
+├── pages/                  # Inertia pages (public/, auth, teams, notes, …)
+├── layouts/                # app/, auth/, settings/, public-layout.tsx
+├── lib/nav.ts              # Nav registry (public + app sidebar)
 └── actions/ | routes/      # Wayfinder-generated (do not hand-edit)
 
-tests/Feature/              # Pest tests (incl. Notes, Teams, Auth)
+routes/
+└── web/                    # One file per domain — routes/web.php globs them
+
+tests/Feature/              # Pest tests (incl. Notes, Posts, Teams, Auth)
 ```
 
-Team-scoped app routes live under `{current_team}` in `routes/web.php`. Settings and invitations are registered separately in `routes/settings.php` / the web routes file.
+Web routes live in `routes/web/*.php` — one file per domain (`public.php`, `app.php`, `settings.php`). `routes/web.php` is just the loader: add a file and its routes register automatically. Team-scoped app routes live under `{current_team}` in `routes/web/app.php`.
 
 ---
 
@@ -218,7 +234,8 @@ If your product does not need Notes, remove the full feature — do not leave ha
 - `database/migrations/*_create_notes_table.php`
 - `database/factories/NoteFactory.php`
 - Notes seed block in `DatabaseSeeder`
-- `Route::resource('notes', …)` in `routes/web.php`
+- `Route::resource('notes', …)` in `routes/web/app.php`
+- Notes props in `app/Http/Controllers/DashboardController.php` (`stats.notes`, `recentNotes` — marked `REFERENCE MODULE`)
 - `Team::notes()` relation
 - `tests/Feature/Notes/`
 
@@ -226,14 +243,44 @@ If your product does not need Notes, remove the full feature — do not leave ha
 
 - `resources/js/pages/notes/`
 - `resources/js/components/notes/`
-- Notes nav item in `resources/js/components/app-sidebar.tsx`
+- Notes entries in `resources/js/lib/nav.ts` (marked `REFERENCE MODULE`)
+- Notes widgets in `resources/js/pages/dashboard.tsx` (stat card, recent notes, quick action — marked `REFERENCE MODULE`)
+- `resources/js/components/markdown-body.tsx` — shared with Posts; delete only if Posts is removed too
 
-**Optional deps used only by Notes**
+**Optional deps**
 
-- `@uiw/react-md-editor`
-- `react-markdown`
+- `@uiw/react-md-editor` (Notes only)
+- `react-markdown` (shared with Posts — remove only if Posts is removed too)
 
 Also remove the Notes section from `AGENTS.md` if you keep that file for AI agents.
+
+---
+
+## Removing the Posts module
+
+If your product does not need public content, remove the full feature — do not leave half of it behind.
+
+**Backend**
+
+- `app/Models/Post.php`
+- `app/Http/Controllers/Public/`
+- `database/migrations/*_create_posts_table.php`
+- `database/factories/PostFactory.php`
+- Posts seed block in `DatabaseSeeder`
+- Posts routes in `routes/web/public.php`
+- `tests/Feature/Posts/`
+
+**Frontend**
+
+- `resources/js/pages/public/posts/`
+- Blog entry in `resources/js/lib/nav.ts` (`publicNav`, marked `REFERENCE MODULE`)
+- `resources/js/components/markdown-body.tsx` — shared with Notes; delete only if Notes is removed too
+
+**Optional deps**
+
+- `react-markdown` (shared with Notes — remove only if Notes is removed too)
+
+Also remove the Posts section from `AGENTS.md` if you keep that file for AI agents.
 
 ---
 

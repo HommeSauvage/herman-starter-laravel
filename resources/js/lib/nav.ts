@@ -1,6 +1,7 @@
 import { Globe, LayoutGrid, NotebookPen } from 'lucide-react';
 import { dashboard, home } from '@/routes';
 import { index as notesIndex } from '@/routes/notes';
+import { index as postsIndex } from '@/routes/posts';
 import type { NavItem } from '@/types';
 
 /**
@@ -14,6 +15,11 @@ export const publicNav: NavItem[] = [
     {
         title: 'Home',
         href: home(),
+    },
+    // REFERENCE MODULE — Posts nav entry. Remove with the Posts feature when unused.
+    {
+        title: 'Blog',
+        href: postsIndex(),
     },
 ];
 

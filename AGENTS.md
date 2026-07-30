@@ -212,15 +212,72 @@ Use Wayfinder to generate TypeScript functions for Laravel routes. Import from `
 
 - To change the port from which the server is run, prepend the command with `SERVER_PORT=xxxx` and `APP_URL=http://localhost:xxxx`. Example: `SERVER_PORT=8001 APP_URL=http://localhost:8001 composer run dev`
 
+# Public pages & layouts
+
+- Public pages live in `resources/js/pages/public/` and get `PublicLayout` automatically (see the layout resolver in `resources/js/app.tsx`). **Never put a public page outside `public/`; never point `default:` away from AppLayout.**
+- Public navigation lives in the nav registry (`resources/js/lib/nav.ts`, `publicNav`) — header, mobile menu, and footer all render from it. Add entries there, not in components.
+- Every page renders `<Seo title … description? />` (`resources/js/components/seo.tsx`). Never use raw `<Head>` for titles — the app name is appended automatically.
+
+# List pages recipe
+
+Index pages compose the shared pieces instead of hand-rolling markup (see `resources/js/pages/notes/index.tsx` for the reference):
+
+- `resources/js/components/empty-state.tsx` — icon + title + description + one action when a list/grid is empty.
+- `resources/js/components/pagination.tsx` — prev/next pager driven by the `PaginatedData<T>` type; renders nothing on a single page.
+- `resources/js/components/search-input.tsx` — icon input + GET form (query-string searches stay shareable).
+- `resources/js/components/loading-state.tsx` — loading convention: **deferred props → skeleton, form submits → the form's `processing` state, everything else → spinner.**
+
+# Routes & navigation
+
+- `routes/web.php` is only a loader: it globs every `routes/web/*.php` file in sorted order. One file per domain (`public.php`, `app.php`, `settings.php`) — **add files, don't edit the loader.**
+- After adding routes or controllers, regenerate Wayfinder helpers: `php artisan wayfinder:generate --with-form`. Files in `resources/js/actions` and `resources/js/routes` are generated — never hand-edit them.
+- Sidebar nav comes from `appNav()` / `appFooterNav` in `resources/js/lib/nav.ts`.
+
+# Design tokens & retheming
+
+The design phase (and any retheme) works through this surface and nothing else:
+
+- **Token values** live in `resources/css/app.css` (`:root`, `.dark`, `--radius`). You may change **values**; never **rename** token variables or the `@theme` `--color-*` mapping.
+- **Fonts** come from the `bunny(...)` declaration in `vite.config.ts` (+ `--font-sans` in `app.css`). Fonts are fetched at build time and self-hosted — **never add a runtime font CDN link.**
+- **Never hardcode colors** (`#hex`, `rgb(`, `oklch(`) in components — use token utilities (`bg-background`, `text-muted-foreground`, `bg-primary`, …).
+- **Never edit `components/ui/*` primitives** — compose them instead (see the sections library).
+
+# Building blocks (compose, don't invent)
+
+**Before writing new public UI, check this list and compose from it; extend a block rather than creating a near-duplicate.**
+
+- `layouts/public-layout.tsx` — public chrome (sticky header, mobile menu, footer); auto-applied to `pages/public/**`.
+- `components/seo.tsx` — `<Seo title description?>` on every page.
+- `components/sections/` — `hero` (centered/split), `page-header`, `feature-grid`, `feature-rows`, `stats-band`, `testimonial-band`, `pricing-table`, `faq`, `cta-band`, `card-grid`. All token-only; list-driven ones render `EmptyState` when empty.
+- `components/media-image.tsx` — fixed-aspect image with lazy loading + zero-network placeholder.
+- `components/empty-state.tsx`, `loading-state.tsx`, `pagination.tsx`, `search-input.tsx` — shared state components for list pages.
+- `components/stat-card.tsx` — KPI card for dashboards.
+- `components/markdown-body.tsx` — shared markdown renderer (Notes + Posts).
+- `lib/nav.ts` — nav registry (`publicNav`, `appNav()`, `appFooterNav`).
+- `routes/web/*.php` — route-file convention: one file per domain, glob-loaded.
+- Reference modules: **Notes** (`pages/notes`, `components/notes`, `NoteController`) teaches team-scoped app CRUD; **Posts** (`pages/public/posts`, `Public/PostController`) teaches public read-side content. Both are marked `REFERENCE MODULE` and are deletable in one pass (see README).
+
 # REFERENCE MODULE — Notes (Herman quality bar)
 
 This starter ships a polished **Notes** CRUD example so Herman's wizard has a concrete quality bar (list → detail → create/edit, markdown editor, empty states, delete confirm, team scoping, Pest coverage).
 
 **If the product does not need Notes, delete the whole module and this section of this file** — do not leave half of it behind:
 
-- Backend: `app/Models/Note.php`, `app/Policies/NotePolicy.php`, `app/Http/Controllers/Notes/`, `app/Http/Requests/Notes/`, migration `*_create_notes_table.php`, `database/factories/NoteFactory.php`, Notes seed block in `DatabaseSeeder`, `Route::resource('notes', …)` in `routes/web.php`, `Team::notes()`, `tests/Feature/Notes/`
-- Frontend: `resources/js/pages/notes/`, `resources/js/components/notes/`, Notes item in `app-sidebar.tsx`
-- Optional deps only used by Notes: `@uiw/react-md-editor`, `react-markdown`
+- Backend: `app/Models/Note.php`, `app/Policies/NotePolicy.php`, `app/Http/Controllers/Notes/`, `app/Http/Requests/Notes/`, migration `*_create_notes_table.php`, `database/factories/NoteFactory.php`, Notes seed block in `DatabaseSeeder`, `Route::resource('notes', …)` in `routes/web/app.php`, Notes props in `DashboardController.php`, `Team::notes()`, `tests/Feature/Notes/`
+- Frontend: `resources/js/pages/notes/`, `resources/js/components/notes/`, Notes entries in `resources/js/lib/nav.ts`, Notes widgets in `resources/js/pages/dashboard.tsx`, `resources/js/components/markdown-body.tsx` (shared with Posts — delete only if Posts is removed too)
+- Optional deps only used by Notes: `@uiw/react-md-editor`; `react-markdown` is shared with Posts
+
+Files are marked with `REFERENCE MODULE` comments so they are easy to find.
+
+# REFERENCE MODULE — Posts (public content quality bar)
+
+This starter ships a public **Posts** read-side example (index with card grid + pagination, markdown detail by slug, `published()` scope, 404 for unpublished) so public content has a concrete quality bar.
+
+**If the product does not need Posts, delete the whole module and this section of this file** — do not leave half of it behind:
+
+- Backend: `app/Models/Post.php`, `app/Http/Controllers/Public/`, migration `*_create_posts_table.php`, `database/factories/PostFactory.php`, Posts seed block in `DatabaseSeeder`, Posts routes in `routes/web/public.php`, `tests/Feature/Posts/`
+- Frontend: `resources/js/pages/public/posts/`, Blog entry in `resources/js/lib/nav.ts` (`publicNav`), `resources/js/components/markdown-body.tsx` (shared with Notes — delete only if Notes is removed too)
+- Optional deps only used by Posts: `react-markdown` (shared with Notes)
 
 Files are marked with `REFERENCE MODULE` comments so they are easy to find.
 
