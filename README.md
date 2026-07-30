@@ -233,9 +233,10 @@ If your product does not need Notes, remove the full feature — do not leave ha
 - `app/Http/Requests/Notes/`
 - `database/migrations/*_create_notes_table.php`
 - `database/factories/NoteFactory.php`
-- Notes seed block in `DatabaseSeeder`
+- Notes seed block in `DatabaseSeeder` (the `Note::upsert(…)` call and the `$team` assignment it uses)
 - `Route::resource('notes', …)` in `routes/web/app.php`
 - Notes props in `app/Http/Controllers/DashboardController.php` (`stats.notes`, `recentNotes` — marked `REFERENCE MODULE`)
+- Notes-specific tests in `tests/Feature/DashboardTest.php` (the "recent notes" tests)
 - `Team::notes()` relation
 - `tests/Feature/Notes/`
 
