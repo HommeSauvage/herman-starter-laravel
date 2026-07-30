@@ -46,6 +46,10 @@ return Application::configure(basePath: dirname(__DIR__))
                 return $response;
             }
 
+            // 404s bypass the web middleware group, so shared Inertia props
+            // (auth, name, teams) may be missing — share them explicitly.
+            Inertia::share(app(HandleInertiaRequests::class)->share($request));
+
             return Inertia::render('error', ['status' => $status])
                 ->toResponse($request)
                 ->setStatusCode($status);
