@@ -8,6 +8,7 @@
 # runs the same checks).
 
 pre-commit:
-    commands:
-        ci-check:
-            run: composer run ci:check
+  commands:
+    ci-check:
+      run: composer run ci:check
+      stage_fixed: true
