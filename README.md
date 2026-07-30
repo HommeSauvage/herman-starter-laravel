@@ -207,11 +207,14 @@ Web routes live in `routes/web/*.php` — one file per domain (`public.php`, `ap
 |----------------------------|----------------------------------------------|
 | `composer run dev`         | PHP server, queue, logs, Vite                |
 | `composer test`            | Pint check + PHPStan + Pest                  |
-| `composer run ci:check`    | Frontend lint/format/types + `composer test` |
+| `composer run ci:check`    | Frontend lint/format/types + fallow + `composer test` |
 | `vendor/bin/pint`          | Format PHP                                   |
 | `bun run lint` / `format`  | ESLint / Prettier                            |
 | `bun run types:check`      | TypeScript                                   |
+| `bun run deadcode:check`   | fallow dead-code gate (unused files/exports/deps) |
 | `php artisan test`         | Pest only                                    |
+
+`composer setup` also installs [lefthook](https://lefthook.dev) git hooks: every `git commit` runs `composer run ci:check` as a pre-commit gate. Bypass only in emergencies with `--no-verify`.
 
 Filter tests while iterating:
 

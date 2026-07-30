@@ -1,0 +1,13 @@
+# Git hooks — installed automatically by `composer setup` (via lefthook).
+#
+# The hook enforces the same gate documented for agents in AGENTS.md, so
+# nothing gets committed that `composer run ci:check` would reject. It is
+# intentionally the *same* command — one source of truth, no hook-only checks.
+#
+# Bypass in an emergency with `git commit --no-verify` (the CI gate still
+# runs the same checks).
+
+pre-commit:
+    commands:
+        ci-check:
+            run: composer run ci:check

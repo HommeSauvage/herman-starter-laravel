@@ -6,7 +6,7 @@ import PasskeyItem from '@/components/passkey-item';
 import PasskeyRegistration from '@/components/passkey-register';
 import type { Passkey } from '@/types/auth';
 
-export type Props = {
+export type ManagePasskeysProps = {
     canManagePasskeys?: boolean;
     passkeys?: Passkey[];
 };
@@ -25,7 +25,7 @@ const EmptyState = () => {
     );
 };
 
-export default function ManagePasskeys(props: Props) {
+export default function ManagePasskeys(props: ManagePasskeysProps) {
     const passkeys = props.passkeys ?? [];
 
     const handleDelete = (id: number, onError: () => void) => {

@@ -8,13 +8,13 @@ import { Button } from '@/components/ui/button';
 import { useTwoFactorAuth } from '@/hooks/use-two-factor-auth';
 import { disable, enable } from '@/routes/two-factor';
 
-export type Props = {
+export type ManageTwoFactorProps = {
     canManageTwoFactor?: boolean;
     requiresConfirmation?: boolean;
     twoFactorEnabled?: boolean;
 };
 
-export default function ManageTwoFactor(props: Props) {
+export default function ManageTwoFactor(props: ManageTwoFactorProps) {
     const requiresConfirmation = props.requiresConfirmation ?? false;
     const twoFactorEnabled = props.twoFactorEnabled ?? false;
 

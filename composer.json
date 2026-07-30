@@ -59,7 +59,8 @@
             "@php artisan key:generate",
             "@php artisan migrate --force",
             "bun install",
-            "bun run build"
+            "bun run build",
+            "bunx lefthook install || exit 0"
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
@@ -76,6 +77,7 @@
             "bun run lint:check",
             "bun run format:check",
             "bun run types:check",
+            "bun run deadcode:check",
             "@test"
         ],
         "types:check": [

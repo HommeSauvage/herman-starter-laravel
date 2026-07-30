@@ -222,9 +222,15 @@ Index pages compose the shared pieces instead of hand-rolling markup (see `resou
 
 # Routes & navigation
 
-- `routes/web.php` is only a loader: it globs every `routes/web/*.php` file in sorted order. One file per domain (`public.php`, `app.php`, `settings.php`) — **add files, don't edit the loader.**
+- `routes/web.php` is only a loader: it globs every `routes/web/*.php` file in sorted order. One file per domain (`public.php`, `app.php`, `settings.php`) — **add/edit files, don't edit the loader.**
 - After adding routes or controllers, regenerate Wayfinder helpers: `php artisan wayfinder:generate --with-form`. Files in `resources/js/actions` and `resources/js/routes` are generated — never hand-edit them.
 - Sidebar nav comes from `appNav()` / `appFooterNav` in `resources/js/lib/nav.ts`.
+
+# Quality gates
+
+- `composer run ci:check` is the single source of truth: ESLint, Prettier, `tsc`, **fallow dead-code**, Pint, PHPStan, Pest. A lefthook **pre-commit hook runs exactly this command** (installed by `composer setup`) so it cannot be forgotten — never use `--no-verify` to dodge a red gate.
+- **fallow** (`bunx fallow dead-code`, config in `.fallowrc.json`) fails on unused files/exports/types/dependencies introduced by a change. The config exempts `components/ui/**` and `components/sections/**` — they are intentional building blocks, not dead code. If fallow flags something you added, delete it or wire it in — do not add ignore rules.
+- `bunx fallow` (full pipeline: duplication, health) is advisory — act on what it finds in code you touch.
 
 # Design tokens & retheming
 
@@ -250,6 +256,21 @@ The design phase (and any retheme) works through this surface and nothing else:
 - `routes/web/*.php` — route-file convention: one file per domain, glob-loaded.
 - Reference modules: **Notes** (`pages/notes`, `components/notes`, `NoteController`) teaches team-scoped app CRUD; **Posts** (`pages/public/posts`, `Public/PostController`) teaches public read-side content. Both are marked `REFERENCE MODULE` and are deletable in one pass (see README).
 
+</other-guidelines>
+
+<initial-setup>
+
+# Initial setup (new project from this starter)
+
+If you are reading this, the project was just scaffolded from the starter. Work in this order:
+
+1. **Learn the quality bar** from the reference modules below (Notes = team-scoped app CRUD, Posts = public read-side content). Build new features to
+the same standard.
+2. **Decide their fate**: keep them, or delete each wholesale using the README removal guides (never leave half a module behind).
+3. **Then delete this entire `<initial-setup>` section** and trim this file to what your project actually uses — move durable knowledge into
+`.agents/skills/` (new skills) or `.agents/docs/` so this file stays small and reference them.
+4. Keep `composer run ci:check` green throughout.
+
 # REFERENCE MODULE — Notes (Herman quality bar)
 
 This starter ships a polished **Notes** CRUD example so Herman's wizard has a concrete quality bar (list → detail → create/edit, markdown editor, empty states, delete confirm, team scoping, Pest coverage).
@@ -273,5 +294,4 @@ This starter ships a public **Posts** read-side example (index with card grid + 
 - Optional deps only used by Posts: `react-markdown` (shared with Notes)
 
 Files are marked with `REFERENCE MODULE` comments so they are easy to find.
-
-</other-guidelines>
+</initial-setup>

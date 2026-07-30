@@ -2,20 +2,14 @@ import { Link, usePage } from '@inertiajs/react';
 import { NotebookPen, Plus } from 'lucide-react';
 import EmptyState from '@/components/empty-state';
 import Heading from '@/components/heading';
+import NoteList from '@/components/notes/note-list';
+import type { NoteListItem } from '@/components/notes/note-list';
 import Pagination from '@/components/pagination';
 import SearchInput from '@/components/search-input';
 import Seo from '@/components/seo';
 import { Button } from '@/components/ui/button';
-import { index as notesIndex, create, show } from '@/routes/notes';
+import { index as notesIndex, create } from '@/routes/notes';
 import type { PaginatedData } from '@/types';
-
-type NoteListItem = {
-    id: number;
-    title: string;
-    excerpt: string;
-    author: string | null;
-    updated_at: string | null;
-};
 
 type Props = {
     notes: PaginatedData<NoteListItem>;
@@ -83,47 +77,7 @@ export default function NotesIndex({ notes, filters }: Props) {
                         testId="notes-empty-state"
                     />
                 ) : (
-                    <ul
-                        className="divide-y rounded-xl border"
-                        data-test="notes-list"
-                    >
-                        {notes.data.map((note) => (
-                            <li key={note.id}>
-                                <Link
-                                    href={
-                                        teamSlug
-                                            ? show([teamSlug, note.id])
-                                            : '#'
-                                    }
-                                    className="block px-4 py-4 transition-colors hover:bg-muted/50"
-                                    data-test="note-row"
-                                >
-                                    <div className="flex items-start justify-between gap-4">
-                                        <div className="min-w-0 space-y-1">
-                                            <p className="truncate font-medium">
-                                                {note.title}
-                                            </p>
-                                            <p className="line-clamp-2 text-sm text-muted-foreground">
-                                                {note.excerpt}
-                                            </p>
-                                        </div>
-                                        <div className="shrink-0 text-right text-xs text-muted-foreground">
-                                            {note.author ? (
-                                                <p>{note.author}</p>
-                                            ) : null}
-                                            {note.updated_at ? (
-                                                <p>
-                                                    {new Date(
-                                                        note.updated_at,
-                                                    ).toLocaleDateString()}
-                                                </p>
-                                            ) : null}
-                                        </div>
-                                    </div>
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
+                    <NoteList notes={notes.data} teamSlug={teamSlug} />
                 )}
 
                 <Pagination pagination={notes} />

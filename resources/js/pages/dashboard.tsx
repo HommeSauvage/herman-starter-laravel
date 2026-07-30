@@ -2,23 +2,17 @@ import { Link, usePage } from '@inertiajs/react';
 import { MailPlus, NotebookPen, Plus, Users } from 'lucide-react';
 import { useState } from 'react';
 import EmptyState from '@/components/empty-state';
+import NoteList from '@/components/notes/note-list';
+import type { NoteListItem } from '@/components/notes/note-list';
 import PendingInvitationsModal from '@/components/pending-invitations-modal';
 import Seo from '@/components/seo';
 import StatCard from '@/components/stat-card';
 import { Button } from '@/components/ui/button';
 import { dashboard } from '@/routes';
 // REFERENCE MODULE — Notes dashboard widgets. Remove with the Notes feature.
-import { create, index as notesIndex, show } from '@/routes/notes';
+import { create, index as notesIndex } from '@/routes/notes';
 import { edit as editTeam } from '@/routes/teams';
 import type { DashboardInvitation } from '@/types';
-
-type RecentNote = {
-    id: number;
-    title: string;
-    excerpt: string;
-    author: string | null;
-    updated_at: string | null;
-};
 
 type Props = {
     pendingInvitations?: DashboardInvitation[];
@@ -27,7 +21,7 @@ type Props = {
         notes: number;
         pendingInvitations: number;
     };
-    recentNotes: RecentNote[];
+    recentNotes: NoteListItem[];
 };
 
 export default function Dashboard({
@@ -125,43 +119,7 @@ export default function Dashboard({
                             }
                         />
                     ) : (
-                        <ul className="divide-y rounded-xl border">
-                            {recentNotes.map((note) => (
-                                <li key={note.id}>
-                                    <Link
-                                        href={
-                                            teamSlug
-                                                ? show([teamSlug, note.id])
-                                                : '#'
-                                        }
-                                        className="block px-4 py-4 transition-colors hover:bg-muted/50"
-                                    >
-                                        <div className="flex items-start justify-between gap-4">
-                                            <div className="min-w-0 space-y-1">
-                                                <p className="truncate font-medium">
-                                                    {note.title}
-                                                </p>
-                                                <p className="line-clamp-2 text-sm text-muted-foreground">
-                                                    {note.excerpt}
-                                                </p>
-                                            </div>
-                                            <div className="shrink-0 text-right text-xs text-muted-foreground">
-                                                {note.author ? (
-                                                    <p>{note.author}</p>
-                                                ) : null}
-                                                {note.updated_at ? (
-                                                    <p>
-                                                        {new Date(
-                                                            note.updated_at,
-                                                        ).toLocaleDateString()}
-                                                    </p>
-                                                ) : null}
-                                            </div>
-                                        </div>
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
+                        <NoteList notes={recentNotes} teamSlug={teamSlug} />
                     )}
                 </div>
             </div>
