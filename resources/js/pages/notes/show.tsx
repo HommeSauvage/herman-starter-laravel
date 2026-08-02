@@ -2,9 +2,10 @@ import { Link, usePage } from '@inertiajs/react';
 import { Pencil } from 'lucide-react';
 import MarkdownBody from '@/components/markdown-body';
 import DeleteNoteDialog from '@/components/notes/delete-note-dialog';
+import { noteBreadcrumbs } from '@/components/notes/note-breadcrumbs';
 import Seo from '@/components/seo';
 import { Button } from '@/components/ui/button';
-import { edit, index as notesIndex, show } from '@/routes/notes';
+import { edit, index as notesIndex } from '@/routes/notes';
 
 type Note = {
     id: number;
@@ -74,17 +75,5 @@ NotesShow.layout = (props: {
     currentTeam?: { slug: string } | null;
     note?: Note;
 }) => ({
-    breadcrumbs: [
-        {
-            title: 'Notes',
-            href: props.currentTeam ? notesIndex(props.currentTeam.slug) : '/',
-        },
-        {
-            title: props.note?.title ?? 'Note',
-            href:
-                props.currentTeam && props.note
-                    ? show([props.currentTeam.slug, props.note.id])
-                    : '/',
-        },
-    ],
+    breadcrumbs: noteBreadcrumbs(props),
 });

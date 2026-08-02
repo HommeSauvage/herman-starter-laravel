@@ -1,13 +1,8 @@
-import { Form, Link, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { usePage } from '@inertiajs/react';
 import NoteController from '@/actions/App/Http/Controllers/Notes/NoteController';
 import Heading from '@/components/heading';
-import InputError from '@/components/input-error';
-import MarkdownEditor from '@/components/notes/markdown-editor';
+import NoteForm from '@/components/notes/note-form';
 import Seo from '@/components/seo';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { create, index as notesIndex } from '@/routes/notes';
 
 /**
@@ -16,9 +11,6 @@ import { create, index as notesIndex } from '@/routes/notes';
 export default function NotesCreate() {
     const page = usePage();
     const teamSlug = page.props.currentTeam?.slug;
-    const [body, setBody] = useState(
-        '## New note\n\nStart writing in **markdown**.',
-    );
 
     return (
         <>
@@ -30,57 +22,18 @@ export default function NotesCreate() {
                     description="Title plus a real markdown editor — not a bare textarea."
                 />
 
-                <Form
-                    {...(teamSlug
-                        ? NoteController.store.form(teamSlug)
-                        : { action: '#', method: 'post' as const })}
-                    className="space-y-6"
-                    data-test="note-create-form"
-                >
-                    {({ processing, errors }) => (
-                        <>
-                            <div className="grid gap-2">
-                                <Label htmlFor="title">Title</Label>
-                                <Input
-                                    id="title"
-                                    name="title"
-                                    required
-                                    autoFocus
-                                    placeholder="Give this note a clear title"
-                                    data-test="note-title-input"
-                                />
-                                <InputError message={errors.title} />
-                            </div>
-
-                            <div className="grid gap-2">
-                                <Label htmlFor="body">Body</Label>
-                                <MarkdownEditor
-                                    id="body"
-                                    value={body}
-                                    onChange={setBody}
-                                />
-                                <InputError message={errors.body} />
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                                <Button
-                                    type="submit"
-                                    disabled={processing}
-                                    data-test="note-save-button"
-                                >
-                                    Create note
-                                </Button>
-                                {teamSlug ? (
-                                    <Button variant="ghost" asChild>
-                                        <Link href={notesIndex(teamSlug)}>
-                                            Cancel
-                                        </Link>
-                                    </Button>
-                                ) : null}
-                            </div>
-                        </>
-                    )}
-                </Form>
+                <NoteForm
+                    form={
+                        teamSlug
+                            ? NoteController.store.form(teamSlug)
+                            : { action: '#', method: 'post' as const }
+                    }
+                    testId="note-create-form"
+                    submitLabel="Create note"
+                    defaultBody="## New note\n\nStart writing in **markdown**."
+                    cancelHref={teamSlug ? notesIndex(teamSlug).url : null}
+                    autoFocusTitle
+                />
             </div>
         </>
     );

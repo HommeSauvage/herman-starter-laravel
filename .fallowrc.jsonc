@@ -1,0 +1,142 @@
+{
+    "$schema": "./node_modules/fallow/schema.json",
+    // Inertia + Laravel entries the static graph cannot see: app.tsx is
+    // referenced from the blade @vite directive, pages are resolved by name.
+    "entry": [
+        "resources/js/app.tsx",
+        "resources/css/app.css",
+        "vite.config.ts",
+        "eslint.config.js"
+    ],
+    "dynamicallyLoaded": [
+        "resources/js/pages/**/*.tsx"
+    ],
+    // Generated Wayfinder output and build artifacts are not source.
+    "ignorePatterns": [
+        "resources/js/actions/**",
+        "resources/js/routes/**",
+        "resources/js/wayfinder/**",
+        "public/build/**",
+        "bootstrap/ssr/**"
+    ],
+    "ignoreDependencies": [
+        // Used by `php artisan dev` (Laravel's DevCommand shells out to it).
+        "concurrently",
+        // Referenced by name in eslint.config.js resolver settings.
+        "eslint-import-resolver-typescript",
+        // Platform-specific build binaries used only on CI matrices.
+        "@rollup/rollup-linux-x64-gnu",
+        "@rollup/rollup-win32-x64-msvc",
+        "@tailwindcss/oxide-linux-x64-gnu",
+        "@tailwindcss/oxide-win32-x64-msvc",
+        "lightningcss-linux-x64-gnu",
+        "lightningcss-win32-x64-msvc"
+    ],
+    "overrides": [
+        {
+            // Starter-kit public API: shadcn primitives and the sections
+            // library are complete building blocks by design — generated
+            // projects compose what they need and delete the rest.
+            "files": [
+                "resources/js/components/ui/**",
+                "resources/js/components/sections/**"
+            ],
+            "rules": {
+                "unused-files": "off",
+                "unused-exports": "off",
+                "unused-types": "off"
+            }
+        },
+        {
+            // Optional variants kept for opt-in use: header layout
+            // (sidebar is the default), auth layout alternatives, the
+            // commented-in team switcher, and the LoadingState convention.
+            "files": [
+                "resources/js/components/app-header.tsx",
+                "resources/js/components/team-switcher.tsx",
+                "resources/js/components/loading-state.tsx",
+                "resources/js/layouts/app/app-header-layout.tsx",
+                "resources/js/layouts/auth/auth-card-layout.tsx",
+                "resources/js/layouts/auth/auth-split-layout.tsx"
+            ],
+            "rules": {
+                "unused-files": "off",
+                "unused-exports": "off"
+            }
+        }
+    ],
+    // The complexity gate measures CRAP against estimated coverage (0% —
+    // the starter ships no JS coverage pipeline). The ceilings below mark
+    // deliberate template code whose branching is feature-driven, not
+    // accidental. Everything outside these groups stays at default
+    // thresholds, so agent-added code still gets flagged.
+    "health": {
+        "ignore": [
+            // Same exemption as the dead-code override above: vendored
+            // shadcn primitives and the sections library are intentional
+            // building blocks — generated projects compose, don't edit.
+            "resources/js/components/ui/**",
+            "resources/js/components/sections/**"
+        ],
+        "thresholdOverrides": [
+            {
+                "files": [
+                    "resources/js/components/team-switcher.tsx",
+                    "resources/js/pages/teams/edit.tsx",
+                    "resources/js/pages/teams/index.tsx"
+                ],
+                "maxCognitive": 20,
+                "maxCrap": 300,
+                "maxUnitSize": 350,
+                "reason": "Team management (switcher, roles, invitations, danger zone) is a deliberate single-file starter feature; branching is feature-driven, not accidental."
+            },
+            {
+                "files": [
+                    "resources/js/components/two-factor-recovery-codes.tsx",
+                    "resources/js/components/two-factor-setup-modal.tsx",
+                    "resources/js/components/manage-two-factor.tsx",
+                    "resources/js/components/manage-passkeys.tsx",
+                    "resources/js/components/passkey-verify.tsx",
+                    "resources/js/components/passkey-register.tsx",
+                    "resources/js/pages/settings/security.tsx",
+                    "resources/js/pages/settings/profile.tsx",
+                    "resources/js/pages/auth/register.tsx",
+                    "resources/js/pages/auth/two-factor-challenge.tsx"
+                ],
+                "maxCrap": 95,
+                "maxUnitSize": 150,
+                "reason": "Auth security flows (2FA, passkeys, recovery codes, profile) deliberately kept as compact single-file flows; WebAuthn/TOTP state machines are inherently branchy."
+            },
+            {
+                "files": [
+                    "resources/js/app.tsx",
+                    "resources/js/layouts/public-layout.tsx",
+                    "resources/js/components/app-header.tsx",
+                    "resources/js/components/user-info.tsx",
+                    "resources/js/pages/dashboard.tsx"
+                ],
+                "maxCrap": 80,
+                "maxUnitSize": 230,
+                "reason": "App shell: layout resolver, public chrome, and dashboard are load-bearing template structure (documented in AGENTS.md), not accidental complexity."
+            },
+            {
+                "files": [
+                    "resources/js/components/notes/note-breadcrumbs.ts",
+                    "resources/js/pages/notes/index.tsx",
+                    "resources/js/pages/notes/show.tsx"
+                ],
+                "maxCrap": 95,
+                "maxUnitSize": 70,
+                "reason": "REFERENCE MODULE — deliberately compact as the copy-from quality bar for generated projects."
+            },
+            {
+                "files": [
+                    "resources/js/pages/public/home.tsx"
+                ],
+                "maxCrap": 35,
+                "maxUnitSize": 140,
+                "reason": "Template landing page — deliberately one file so generated projects replace it wholesale."
+            }
+        ]
+    }
+}
