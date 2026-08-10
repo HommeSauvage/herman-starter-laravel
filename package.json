@@ -9,7 +9,7 @@
         "dev": "vite",
         "format": "prettier --write resources/",
         "format:check": "prettier --check resources/",
-        "deadcode:check": "fallow dead-code",
+        "deadcode:check": "fallow dead-code --format json",
         "lint": "eslint . --fix",
         "lint:check": "eslint .",
         "types:check": "tsc --noEmit"

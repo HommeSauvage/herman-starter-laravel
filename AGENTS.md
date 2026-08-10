@@ -18,8 +18,8 @@ Operating contract for coding agents in this repository. Every rule here is load
 
 ## Quality gates
 
-- `composer run ci:check` is the single source of truth: ESLint, Prettier, `tsc`, fallow dead-code, Pint, PHPStan, Pest. A lefthook pre-commit hook runs exactly this — never use `--no-verify` to dodge a red gate.
-- **fallow** (`bunx fallow dead-code`, config `.fallowrc.json`) fails on unused files/exports/types/dependencies your change introduces. `components/ui/**` and `components/sections/**` are exempt — intentional building blocks. If fallow flags something you added: delete it or wire it in — never add ignore rules. `bunx fallow` (full pipeline) is advisory.
+- `composer run ci:check` is the single source of truth: ESLint, Prettier, `tsc`, fallow, Pint, PHPStan, Pest. A lefthook pre-commit hook runs exactly this — never use `--no-verify` to dodge a red gate.
+- **fallow** (`bunx fallow --format json`, config `.fallowrc.json`)
 - After modifying PHP files, run `vendor/bin/pint --dirty --format agent` before finalizing. Code style is enforced by Pint + PHPStan — let the gate judge it.
 - Tests: `php artisan make:test --pest Name` (no suite directory in the name), feature tests by default, models via factories. Run `php artisan test --compact` (`--filter=` to narrow). Never delete tests without approval.
 - Don't write throwaway verification scripts or tinker snippets when a test can prove the behavior — write the test.
