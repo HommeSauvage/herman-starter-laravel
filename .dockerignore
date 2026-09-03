@@ -1,0 +1,19 @@
+# Build context hygiene — keep dev secrets + generated dirs out of the image.
+.git
+node_modules
+vendor
+.env
+.env.backup
+.env.production
+storage/logs
+storage/framework/cache
+storage/framework/sessions
+storage/framework/views
+storage/pail
+public/build
+public/hot
+bootstrap/ssr
+resources/js/actions
+resources/js/routes
+resources/js/wayfinder
+.DS_Store

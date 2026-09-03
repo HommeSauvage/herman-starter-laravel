@@ -1,0 +1,15 @@
+# Reference Litestream config — per-tenant S3-compatible replication.
+# Values are env-interpolated by litestream at container start; the
+# entrypoint restores from this same replica set before serving. Each tenant
+# gets its own object-storage prefix (tenants/<project>/), never a shared
+# path.
+dbs:
+  - path: ${DB_DATABASE}
+    replicas:
+      - type: s3
+        endpoint: ${LITESTREAM_ENDPOINT}
+        bucket: ${LITESTREAM_BUCKET}
+        path: tenants/${LITESTREAM_TENANT}/
+        access-key-id: ${LITESTREAM_ACCESS_KEY_ID}
+        secret-access-key: ${LITESTREAM_SECRET_ACCESS_KEY}
+        force-path-style: true

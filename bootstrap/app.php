@@ -18,6 +18,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Behind the TLS-terminating kamal-proxy (previews/prod) + Cloudflare
+        // edge, X-Forwarded-Proto/Host are authoritative — without trusting
+        // them, server-generated absolute URLs come back as plain http.
+        // Ingress is restricted to those proxies, so trusting all is safe.
+        $middleware->trustProxies(at: '*');
+
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
         $middleware->web(append: [

@@ -294,7 +294,16 @@ Also remove the Posts section from `AGENTS.md` if you keep that file for AI agen
 - Sessions, cache, and queue default to the database driver — fine for local; tune for production.
 - Passkeys use your `APP_URL` as relying party / origin — keep `APP_URL` accurate in every environment.
 
-Deploy easily on [Laravel Cloud](https://cloud.laravel.com/) or any standard Laravel host.
+### Docker / production image
+
+The repo ships a production `Dockerfile` (multi-stage: bun/vite build →
+FrankenPHP + pdo_sqlite) plus `docker/entrypoint.sh` and `litestream.yml`
+for the SQLite data plane (restore-if-empty → migrate → replicate). Build
+with `docker build -t my-app .`. Runtime configuration arrives via
+deployment env (never build args); `DB_DATABASE` points at the SQLite file
+and `LITESTREAM_*` configure replication when used. The app trusts
+`X-Forwarded-*` so absolute URLs stay `https://` behind a TLS-terminating
+proxy. Deploy anywhere you can run a container — or Laravel Cloud.
 
 ---
 
