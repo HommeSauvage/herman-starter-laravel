@@ -9,19 +9,20 @@
 # Base images are pinned by version tag; bump deliberately.
 
 # ---- Frontend build stage ----
-FROM oven/bun:1.4.0-alpine AS assets
-# Laravel Wayfinder generates route types from the PHP app AT BUILD TIME
-# (the vite plugin runs `php artisan wayfinder:generate --with-form`) — the
+# Same PHP minor as the runtime: Laravel Wayfinder parses the PHP source at
+# build time (the vite plugin runs `php artisan wayfinder:generate`) — the
 # assets stage needs PHP + the composer vendor tree, not just bun. All prod
 # deps (wayfinder is in `require`, not require-dev).
-RUN apk add --no-cache \
-  php84-cli php84-phar php84-mbstring php84-xml php84-dom php84-xmlwriter \
-  php84-tokenizer php84-ctype php84-curl php84-fileinfo php84-iconv \
-  php84-openssl php84-session php84-simplexml php84-pdo php84-pdo_sqlite \
-  php84-sqlite3 php84-intl php84-zip
-# Alpine versions the binary (php84) — composer + artisan expect `php`.
-RUN ln -sf /usr/bin/php84 /usr/bin/php
+#
+# Bun is copied from the official Debian build so the binary is linked against
+# this glibc base (the alpine build of bun is a musl binary).
+FROM dunglas/frankenphp:php8.5-bookworm AS assets
+COPY --from=oven/bun:1.4.0-debian /usr/local/bin/bun /usr/local/bin/bun
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git unzip libzip-dev libicu-dev \
+    && docker-php-ext-install -j"$(nproc)" zip intl \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY composer.json composer.lock ./
 # --no-scripts: artisan isn't in the tree yet (package:discover fires on
@@ -39,7 +40,7 @@ RUN cp .env.example .env && php artisan key:generate --force --no-interaction
 RUN bun run build
 
 # ---- Runtime stage ----
-FROM dunglas/frankenphp:php8.4-bookworm
+FROM dunglas/frankenphp:php8.5-bookworm
 WORKDIR /app
 
 # Composer is not in the frankenphp image.
@@ -62,6 +63,7 @@ RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-pr
 COPY . .
 COPY --from=assets /app/public/build ./public/build
 COPY litestream.yml /etc/litestream.yml
+COPY docker/php.ini /usr/local/etc/php/conf.d/zz-herman.ini
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN mkdir -p storage/framework/cache/data storage/framework/sessions \
     storage/framework/views storage/app/public storage/app/private \

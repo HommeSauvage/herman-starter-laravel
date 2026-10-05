@@ -21,8 +21,10 @@ Route::prefix('{current_team}')
     ->group(function () {
         Route::get('dashboard', DashboardController::class)->name('dashboard');
 
+        /* @chisel-notes */
         // REFERENCE MODULE — Notes CRUD quality-bar example. Delete this resource when unused.
         Route::resource('notes', NoteController::class);
+        /* @end-chisel-notes */
     });
 
 Route::middleware(['auth'])->group(function () {

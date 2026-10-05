@@ -43,9 +43,12 @@ class DashboardController extends Controller
                         ->whereNull('expires_at')
                         ->orWhere('expires_at', '>=', now()))
                     ->count(),
+                /* @chisel-notes */
                 // REFERENCE MODULE — Notes stat. Remove with the Notes feature.
                 'notes' => $current_team->notes()->count(),
+                /* @end-chisel-notes */
             ],
+            /* @chisel-notes */
             // REFERENCE MODULE — recent notes list. Remove with the Notes feature.
             'recentNotes' => $current_team->notes()
                 ->with('user:id,name')
@@ -59,6 +62,7 @@ class DashboardController extends Controller
                     'author' => $note->user->name,
                     'updated_at' => $note->updated_at?->toIso8601String(),
                 ]),
+            /* @end-chisel-notes */
         ]);
     }
 }

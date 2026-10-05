@@ -134,6 +134,7 @@ test('dashboard does not include or delete other users invitations', function ()
         'id' => $invitation->id,
     ]);
 });
+/* @chisel-notes */
 // REFERENCE MODULE — Notes dashboard coverage. Delete with the Notes feature.
 test('dashboard includes real counts and recent notes for the current team', function () {
     $user = User::factory()->create();
@@ -157,6 +158,9 @@ test('dashboard includes real counts and recent notes for the current team', fun
     );
 });
 
+/* @end-chisel-notes */
+
+/* @chisel-notes */
 // REFERENCE MODULE — Notes dashboard coverage. Delete with the Notes feature.
 test('dashboard recent notes are limited to five and ordered by latest', function () {
     $user = User::factory()->create();
@@ -175,3 +179,4 @@ test('dashboard recent notes are limited to five and ordered by latest', functio
         ->has('recentNotes', 5),
     );
 });
+/* @end-chisel-notes */

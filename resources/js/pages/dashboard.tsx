@@ -56,12 +56,14 @@ export default function Dashboard({
                     </div>
                     {teamSlug ? (
                         <div className="flex flex-wrap gap-2">
+                            {/* @chisel-notes */}
                             {/* REFERENCE MODULE — Notes quick action. Remove with the Notes feature. */}
                             <Button asChild>
                                 <Link href={create(teamSlug)}>
                                     <Plus /> New note
                                 </Link>
                             </Button>
+                            {/* @end-chisel-notes */}
                             <Button variant="outline" asChild>
                                 <Link href={editTeam(teamSlug)}>
                                     <MailPlus /> Invite member
@@ -77,12 +79,14 @@ export default function Dashboard({
                         label="Team members"
                         value={stats.members}
                     />
+                    {/* @chisel-notes */}
                     {/* REFERENCE MODULE — Notes stat. Remove with the Notes feature. */}
                     <StatCard
                         icon={NotebookPen}
                         label="Notes"
                         value={stats.notes}
                     />
+                    {/* @end-chisel-notes */}
                     <StatCard
                         icon={MailPlus}
                         label="Pending invitations"
@@ -90,6 +94,7 @@ export default function Dashboard({
                     />
                 </div>
 
+                {/* @chisel-notes */}
                 {/* REFERENCE MODULE — recent notes section. Remove with the Notes feature. */}
                 <div className="flex flex-col gap-3">
                     <div className="flex items-center justify-between">
@@ -122,6 +127,7 @@ export default function Dashboard({
                         <NoteList notes={recentNotes} teamSlug={teamSlug} />
                     )}
                 </div>
+                {/* @end-chisel-notes */}
             </div>
         </>
     );

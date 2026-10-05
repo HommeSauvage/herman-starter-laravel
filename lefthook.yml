@@ -12,3 +12,17 @@ pre-commit:
     ci-check:
       run: composer run ci:check
       stage_fixed: true
+
+# Wayfinder output (resources/js/{actions,routes}) and the Laravel runtime
+# dirs are gitignored, so a checkout into a fresh git worktree has neither —
+# and then `tsc` / `bun run build` fail on missing imports, and artisan
+# refuses to boot without storage/framework. One script, both hooks.
+post-checkout:
+  commands:
+    prepare-wayfinder:
+      run: sh scripts/prepare-wayfinder.sh
+
+post-merge:
+  commands:
+    prepare-wayfinder:
+      run: sh scripts/prepare-wayfinder.sh

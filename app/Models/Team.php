@@ -96,6 +96,7 @@ class Team extends Model
         return $this->hasMany(TeamInvitation::class);
     }
 
+    /* @chisel-notes */
     /**
      * REFERENCE MODULE — team notes. Delete with Notes when unused.
      *
@@ -105,6 +106,7 @@ class Team extends Model
     {
         return $this->hasMany(Note::class);
     }
+    /* @end-chisel-notes */
 
     /**
      * Get the attributes that should be cast.

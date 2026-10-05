@@ -16,11 +16,13 @@ export const publicNav: NavItem[] = [
         title: 'Home',
         href: home(),
     },
+    /* @chisel-posts */
     // REFERENCE MODULE — Posts nav entry. Remove with the Posts feature when unused.
     {
         title: 'Blog',
         href: postsIndex(),
     },
+    /* @end-chisel-posts */
 ];
 
 /**
@@ -38,12 +40,14 @@ export function appNav(currentTeamSlug?: string | null): NavItem[] {
             href: dashboard(currentTeamSlug),
             icon: LayoutGrid,
         },
+        /* @chisel-notes */
         // REFERENCE MODULE — Notes nav entry. Remove with the Notes feature when unused.
         {
             title: 'Notes',
             href: notesIndex(currentTeamSlug),
             icon: NotebookPen,
         },
+        /* @end-chisel-notes */
     ];
 }
 

@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
 
         $team = $user->currentTeam;
 
+        /* @chisel-notes */
         // REFERENCE MODULE — demo notes for the quality-bar Notes feature.
         // Requires unique(team_id, title) — see create_notes_table migration.
         Note::upsert(
@@ -66,6 +67,9 @@ MD,
             update: ['user_id', 'body'],
         );
 
+        /* @end-chisel-notes */
+
+        /* @chisel-posts */
         // REFERENCE MODULE — demo posts for the public content quality-bar
         // Posts feature. Delete this block with the Posts module when unused.
         Post::upsert(
@@ -181,5 +185,6 @@ MD,
             uniqueBy: ['slug'],
             update: ['title', 'excerpt', 'body', 'image_path', 'published_at'],
         );
+        /* @end-chisel-posts */
     }
 }

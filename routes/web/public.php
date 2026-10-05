@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'public/home')->name('home');
 
+/* @chisel-posts */
 // REFERENCE MODULE — public Posts read side. Delete this resource when unused.
 Route::get('posts', [PostController::class, 'index'])->name('posts.index');
 Route::get('posts/{post:slug}', [PostController::class, 'show'])->name('posts.show');
+/* @end-chisel-posts */

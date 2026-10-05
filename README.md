@@ -19,7 +19,8 @@ Most Laravel React kits give you login and a dashboard. Herman goes further:
 - **Modern auth** — registration, email verification, password reset, 2FA, and WebAuthn passkeys
 - **Type-safe frontend** — Wayfinder-generated TypeScript for controller actions and routes
 - **Reference CRUD** — a full Notes module (list → show → create/edit, markdown, policies, Pest tests) you can keep or delete
-- **Ship-ready DX** — Pest, Pint, Larastan, ESLint, Prettier, React Compiler, Laravel Boost
+- **Ship-ready DX** — Pest, Pint, Larastan, ESLint, Prettier, Laravel Boost, Chisel module removal
+- **Agent-grade verification** — `composer run agent:report` (one JSON line: tests, routes, boot memory, memory soak) and `composer run soak` (no per-request memory retention)
 - **Teams included** — create teams, invite members, roles & permissions, team-scoped URLs
 
 Use it as the base for an AI-assisted product (or a traditional one) and start building features instead of scaffolding.
@@ -228,6 +229,14 @@ php artisan test --compact --filter=Note
 
 If your product does not need Notes, remove the full feature — do not leave half of it behind.
 
+**Let Chisel do it** (run before the first `php artisan migrate`):
+
+```bash
+composer run chisel -- --answers='{"modules":["posts"]}'   # keep Posts, drop Notes
+```
+
+It deletes the files below, strips the marked UI/routes/tests, prunes the imports and uninstalls the optional dependency. The checklist is the manual fallback.
+
 **Backend**
 
 - `app/Models/Note.php`
@@ -256,13 +265,21 @@ If your product does not need Notes, remove the full feature — do not leave ha
 - `@uiw/react-md-editor` (Notes only)
 - `react-markdown` (shared with Posts — remove only if Posts is removed too)
 
-Also remove the Notes section from `AGENTS.md` if you keep that file for AI agents.
+Chisel also removes the Notes section from `AGENTS.md`; do it by hand only if you removed the module manually.
 
 ---
 
 ## Removing the Posts module
 
 If your product does not need public content, remove the full feature — do not leave half of it behind.
+
+**Let Chisel do it** (run before the first `php artisan migrate`):
+
+```bash
+composer run chisel -- --answers='{"modules":["notes"]}'   # keep Notes, drop Posts
+```
+
+It handles everything in the checklist below, including the nav entry, the seeder block and the shared markdown pieces when both modules go.
 
 **Backend**
 
