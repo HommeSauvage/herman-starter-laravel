@@ -69,7 +69,9 @@ class FortifyServiceProvider extends ServiceProvider
         ]));
 
         Fortify::resetPasswordView(fn (Request $request) => Inertia::render('auth/reset-password', [
-            'email' => $request->email,
+            // Always a string: this view is reachable without an ?email= (a bare
+            // reset link), and a null lands in a controlled input.
+            'email' => $request->string('email')->toString(),
             'token' => $request->route('token'),
         ]));
 
@@ -105,6 +107,7 @@ class FortifyServiceProvider extends ServiceProvider
             return Limit::perMinute(5)->by($throttleKey);
         });
 
+        /* @chisel-passkeys */
         RateLimiter::for('passkeys', function (Request $request) {
             $credentialId = $request->input('credential.id');
 
@@ -112,6 +115,7 @@ class FortifyServiceProvider extends ServiceProvider
                 ($credentialId ?: $request->session()->getId()).'|'.$request->ip(),
             );
         });
+        /* @end-chisel-passkeys */
     }
 
     /**

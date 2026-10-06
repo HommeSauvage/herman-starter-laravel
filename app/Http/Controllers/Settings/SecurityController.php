@@ -20,6 +20,7 @@ class SecurityController extends Controller
     {
         $props = [
             'canManageTwoFactor' => Features::canManageTwoFactorAuthentication(),
+            /* @chisel-passkeys */
             'canManagePasskeys' => Features::canManagePasskeys(),
             'passkeys' => Features::canManagePasskeys()
                 ? $request->user()
@@ -37,6 +38,7 @@ class SecurityController extends Controller
                     ->values()
                     ->all()
                 : [],
+            /* @end-chisel-passkeys */
             'passwordRules' => Password::defaults()->toPasswordRulesString(),
         ];
 

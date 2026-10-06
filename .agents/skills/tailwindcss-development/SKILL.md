@@ -18,12 +18,6 @@ Use `search-docs` for detailed Tailwind CSS v4 patterns and documentation.
 - Offer to extract repeated patterns into components that match the project's conventions (e.g., Blade, JSX, Vue).
 - Consider class placement, order, priority, and defaults. Remove redundant classes, add classes to parent or child elements carefully to reduce repetition, and group elements logically.
 
-## This Project (starter conventions)
-
-- **Tokens only.** Never raw palette utilities (`bg-gray-900`, `text-blue-500`, `bg-white` for surfaces) in components — use semantic tokens (`bg-background`, `text-foreground`, `text-muted-foreground`, `bg-primary`). Token values live in `resources/css/app.css` (`:root`, `.dark`); you may change values, never rename tokens or the `@theme` `--color-*` mapping.
-- **Compose, don't hand-roll.** Check `components/ui/*` (primitives — never edit them) and `components/sections/*` (`hero`, `feature-grid`, `pricing-table`, …) before writing new styled markup.
-- Fonts come from the `bunny(...)` declaration in `vite.config.ts` and are self-hosted — never add a runtime font CDN link.
-
 ## Tailwind CSS v4 Specifics
 
 - Always use Tailwind CSS v4 and avoid deprecated utilities.
@@ -84,28 +78,12 @@ Use `gap` utilities instead of margins for spacing between siblings:
 
 ## Dark Mode
 
-Dark mode is handled by the design tokens: the `.dark` block in `resources/css/app.css` redefines them. Use semantic utilities (`bg-background`, `text-foreground`, `bg-card`) and components adapt automatically — do not write `dark:` palette overrides like `dark:bg-gray-900` in components.
+If existing pages and components support dark mode, new pages and components must support it the same way, typically using the `dark:` variant:
 
-## Common Patterns
-
-### Flexbox Layout
-
-<!-- Flexbox Layout -->
+<!-- Dark Mode -->
 ```html
-<div class="flex items-center justify-between gap-4">
-    <div>Left content</div>
-    <div>Right content</div>
-</div>
-```
-
-### Grid Layout
-
-<!-- Grid Layout -->
-```html
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <div>Card 1</div>
-    <div>Card 2</div>
-    <div>Card 3</div>
+<div class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+    Content adapts to color scheme
 </div>
 ```
 
@@ -115,4 +93,4 @@ Dark mode is handled by the design tokens: the `.dark` block in `resources/css/a
 - Using `@tailwind` directives instead of `@import "tailwindcss"`
 - Trying to use `tailwind.config.js` instead of CSS `@theme` directive
 - Using margins for spacing between siblings instead of gap utilities
-- Using raw palette colors instead of the project's semantic tokens
+- Forgetting to add dark mode variants when the project uses dark mode

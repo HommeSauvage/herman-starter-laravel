@@ -49,6 +49,7 @@ test('users can authenticate using the login screen', function () {
     $response->assertRedirect(route('dashboard'));
 });
 
+/* @chisel-passkeys */
 test('passkey login response redirects to the current team dashboard', function () {
     $user = User::factory()->create();
 
@@ -62,6 +63,7 @@ test('passkey login response redirects to the current team dashboard', function 
 
     expect($jsonResponse->getData()->redirect)->toBe(route('dashboard', ['current_team' => $user->personalTeam()->slug]));
 });
+/* @end-chisel-passkeys */
 
 test('users with two factor enabled are redirected to two factor challenge', function () {
     if (! Features::canManageTwoFactorAuthentication()) {

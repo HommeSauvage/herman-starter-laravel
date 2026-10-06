@@ -1,5 +1,6 @@
 import { usePage } from '@inertiajs/react';
 import Pagination from '@/components/pagination';
+import type { CardGridItem } from '@/components/sections/card-grid';
 import CardGrid from '@/components/sections/card-grid';
 import PageHeader from '@/components/sections/page-header';
 import Seo from '@/components/seo';
@@ -25,6 +26,20 @@ export default function PostsIndex({
 }) {
     const { name } = usePage().props;
 
+    const cards: CardGridItem[] = posts.data.map((post) => ({
+        title: post.title,
+        excerpt: post.excerpt,
+        image: post.image_path,
+        href: show(post.slug),
+        meta: post.published_at
+            ? new Date(post.published_at).toLocaleDateString(undefined, {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+              })
+            : null,
+    }));
+
     return (
         <>
             <Seo
@@ -39,25 +54,7 @@ export default function PostsIndex({
                 className="pb-10"
             />
 
-            <CardGrid
-                className="py-0"
-                items={posts.data.map((post) => ({
-                    title: post.title,
-                    excerpt: post.excerpt,
-                    image: post.image_path,
-                    href: show(post.slug),
-                    meta: post.published_at
-                        ? new Date(post.published_at).toLocaleDateString(
-                              undefined,
-                              {
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric',
-                              },
-                          )
-                        : null,
-                }))}
-            />
+            <CardGrid className="py-0" items={cards} />
 
             <div className="mx-auto w-full max-w-6xl px-4 pb-16 md:px-6">
                 <Pagination pagination={posts} />

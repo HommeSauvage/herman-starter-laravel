@@ -14,13 +14,17 @@ declare(strict_types=1);
 |
 */
 
-test('the always-loaded context stays small', function () {
+test('the hand-written context stays small', function () {
+    // AGENTS.md is the hand-written contract plus a Boost-generated block. Only
+    // the hand-written part is ours to keep in check, so strip the generated
+    // block first — otherwise its size hides growth in our own prose.
     $agents = (string) file_get_contents(dirname(__DIR__, 3).'/AGENTS.md');
+    $agents = (string) preg_replace('/<laravel-boost-guidelines>.*?<\/laravel-boost-guidelines>/s', '', $agents);
 
     $this->assertLessThanOrEqual(
         5800,
         strlen($agents),
-        'AGENTS.md is '.strlen($agents).' chars (budget 5800, ~1.5k tokens). Move conditional detail into .agents/skills/ or Boost guidelines.',
+        'Hand-written AGENTS.md is '.strlen($agents).' chars (budget 5800, ~1.5k tokens). Move conditional detail into .agents/skills/ or Boost guidelines.',
     );
 });
 

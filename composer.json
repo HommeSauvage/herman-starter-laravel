@@ -73,6 +73,9 @@
         "chisel": [
             "@php artisan chisel"
         ],
+        "modules": [
+            "@php scripts/module-integrity.php"
+        ],
         "agent:report": [
             "@php scripts/agent-report.php"
         ],

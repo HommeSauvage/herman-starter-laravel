@@ -7,25 +7,40 @@ use Laravel\Chisel\Question;
 
 /*
 |--------------------------------------------------------------------------
-| Chisel script — optional-feature removal
+| Chisel script — optional-module removal
 |--------------------------------------------------------------------------
 |
-| The Herman starter ships two reference modules (Notes, Posts) that set the
-| quality bar and are meant to be kept or dropped wholesale. This script is
-| the single source of truth for dropping them: files, marked sections,
-| imports and optional JS dependencies.
+| The starter ships three optional modules (Notes, Posts, Passkeys) that exist
+| for two reasons: they show the quality bar, and they can be dropped whole.
+| This script removes them properly — files, marked blocks, routes, tests,
+| docs and npm dependencies.
 |
-|   composer run chisel                       # interactive
-|   composer run chisel -- --answers='{"modules":["notes"]}'   # agent / wizard
+|   composer run chisel                                        # interactive
+|   composer run chisel -- --answers='{"modules":["notes"]}'    # agent / wizard
+|   composer run chisel -- --answers='{"modules":[]}'           # drop all three
 |
-| Selected module  → its @chisel-<tag> markers are stripped; the feature stays.
-| Dropped module   → its files are deleted, marked sections and imports are
-|                    removed, and its optional JS dependency is uninstalled.
+| Kept module  → its @chisel-<tag> markers are stripped, the feature stays.
+| Dropped      → its files are deleted, its marked blocks and imports are
+|                removed, and its optional JS dependency is uninstalled.
 |
 | Run it before the first `php artisan migrate` (a dropped module's migration
-| is deleted, not rolled back). Run it after `composer run setup` so
-| node_modules exists and JS dependencies can be pruned.
+| is deleted, not rolled back) and after `bun install` so JS dependencies can
+| be pruned.
+|
+| What each module owns lives in `chisel.modules.php` — the same contract
+| `composer run modules` (scripts/module-integrity.php) gates on, so the two
+| can never disagree. Hand-deleting a module leaves residue and fails that gate.
 */
+
+/** @var array{modules: array<string, array<string, mixed>>, last_module: array<string, mixed>} $contract */
+$contract = require __DIR__.'/chisel.modules.php';
+$modules = $contract['modules'];
+
+$labels = [];
+
+foreach ($modules as $tag => $module) {
+    $labels[$tag] = $module['label'];
+}
 
 // Checked at call time, not at script-load time: a caller may install
 // dependencies between loading the script and applying the answers.
@@ -37,62 +52,21 @@ $removePackages = static function (Chisel $chisel, string ...$packages): void {
     $chisel->npm()->remove(...$packages);
 };
 
-$moduleFiles = [
-    'notes' => [
-        'routes/web/app.php',
-        'app/Models/Team.php',
-        'app/Http/Controllers/DashboardController.php',
-        'database/seeders/DatabaseSeeder.php',
-        'resources/js/lib/nav.ts',
-        'resources/js/pages/dashboard.tsx',
-        'tests/Feature/DashboardTest.php',
-        'AGENTS.md',
-    ],
-    'posts' => [
-        'routes/web/public.php',
-        'database/seeders/DatabaseSeeder.php',
-        'resources/js/lib/nav.ts',
-        'AGENTS.md',
-    ],
-];
-
 return Chisel::script(__DIR__)
     ->questions([
         Question::multiselect(
             name: 'modules',
-            label: 'Which reference modules should this app keep?',
-            options: [
-                'notes' => 'Notes — team-scoped CRUD reference (list, detail, create/edit, policies, tests)',
-                'posts' => 'Posts — public content reference (index, detail, markdown body)',
-            ],
-            default: ['notes', 'posts'],
+            label: 'Which optional modules should this app keep?',
+            options: $labels,
+            default: array_keys($modules),
             hint: 'Unselected modules are removed wholesale. Space toggles, enter confirms.',
         ),
     ])
     ->selected('modules', 'notes',
-        then: fn (Chisel $chisel) => $chisel->files(...$moduleFiles['notes'])->removeSectionMarkers('notes'),
-        else: function (Chisel $chisel) use ($moduleFiles, $removePackages): void {
-            $chisel->files(
-                'app/Http/Controllers/Notes/NoteController.php',
-                'app/Http/Requests/Notes/StoreNoteRequest.php',
-                'app/Http/Requests/Notes/UpdateNoteRequest.php',
-                'app/Models/Note.php',
-                'app/Policies/NotePolicy.php',
-                'database/factories/NoteFactory.php',
-                'database/migrations/2026_07_19_041832_create_notes_table.php',
-                'resources/js/components/notes/delete-note-dialog.tsx',
-                'resources/js/components/notes/markdown-editor.tsx',
-                'resources/js/components/notes/note-breadcrumbs.ts',
-                'resources/js/components/notes/note-form.tsx',
-                'resources/js/components/notes/note-list.tsx',
-                'resources/js/pages/notes/create.tsx',
-                'resources/js/pages/notes/edit.tsx',
-                'resources/js/pages/notes/index.tsx',
-                'resources/js/pages/notes/show.tsx',
-                'tests/Feature/Notes/NoteTest.php',
-            )->delete();
-
-            $chisel->files(...$moduleFiles['notes'])->removeSection('notes');
+        then: fn (Chisel $chisel) => $chisel->files(...$modules['notes']['shared'])->removeSectionMarkers('notes'),
+        else: function (Chisel $chisel) use ($modules, $removePackages): void {
+            $chisel->files(...$modules['notes']['owned'])->delete();
+            $chisel->files(...$modules['notes']['shared'])->removeSection('notes');
 
             $chisel->file('resources/js/lib/nav.ts')
                 ->removeLinesContaining('@/routes/notes')
@@ -108,6 +82,9 @@ return Chisel::script(__DIR__)
                 ->replace('{ MailPlus, NotebookPen, Plus, Users }', '{ MailPlus, Users }');
 
             $chisel->php('routes/web/app.php')->removeImport('App\Http\Controllers\Notes\NoteController');
+            $chisel->file('app/Models/Team.php')
+                ->removeLinesContaining('@property-read Collection<int, Note> $notes');
+
             $chisel->php('app/Models/Team.php')->removeImport('App\Models\Note');
             $chisel->php('app/Http/Controllers/DashboardController.php')->removeImport('App\Models\Note');
             $chisel->php('database/seeders/DatabaseSeeder.php')->removeImport('App\Models\Note');
@@ -117,32 +94,87 @@ return Chisel::script(__DIR__)
         },
     )
     ->selected('modules', 'posts',
-        then: fn (Chisel $chisel) => $chisel->files(...$moduleFiles['posts'])->removeSectionMarkers('posts'),
-        else: function (Chisel $chisel) use ($moduleFiles): void {
-            $chisel->files(
-                'app/Http/Controllers/Public/PostController.php',
-                'app/Models/Post.php',
-                'database/factories/PostFactory.php',
-                'database/migrations/2026_07_30_034924_create_posts_table.php',
-                'resources/js/pages/public/posts/index.tsx',
-                'resources/js/pages/public/posts/show.tsx',
-                'tests/Feature/Posts/PostTest.php',
-            )->delete();
-
-            $chisel->files(...$moduleFiles['posts'])->removeSection('posts');
+        then: fn (Chisel $chisel) => $chisel->files(...$modules['posts']['shared'])->removeSectionMarkers('posts'),
+        else: function (Chisel $chisel) use ($modules): void {
+            $chisel->files(...$modules['posts']['owned'])->delete();
+            $chisel->files(...$modules['posts']['shared'])->removeSection('posts');
 
             $chisel->file('resources/js/lib/nav.ts')->removeLinesContaining('@/routes/posts');
             $chisel->php('routes/web/public.php')->removeImport('App\Http\Controllers\Public\PostController');
             $chisel->php('database/seeders/DatabaseSeeder.php')->removeImport('App\Models\Post');
         },
     )
-    ->apply(function (Chisel $chisel, array $answers) use ($removePackages): void {
-        $modules = (array) ($answers['modules'] ?? []);
+    ->selected('modules', 'passkeys',
+        then: fn (Chisel $chisel) => $chisel->files(...$modules['passkeys']['shared'])->removeSectionMarkers('passkeys'),
+        else: function (Chisel $chisel) use ($modules, $removePackages): void {
+            $chisel->files(...$modules['passkeys']['owned'])->delete();
+            $chisel->files(...$modules['passkeys']['shared'])->removeSection('passkeys');
 
-        // markdown-body.tsx and react-markdown are shared by both modules.
-        if (! in_array('notes', $modules, true) && ! in_array('posts', $modules, true)) {
-            $chisel->file('resources/js/components/markdown-body.tsx')->delete();
+            $chisel->php('app/Models/User.php')
+                ->removeInterface('PasskeyUser')
+                ->removeTrait('PasskeyAuthenticatable')
+                ->removeImport('Laravel\Fortify\Contracts\PasskeyUser')
+                ->removeImport('Laravel\Fortify\PasskeyAuthenticatable');
 
-            $removePackages($chisel, 'react-markdown');
+            $chisel->php('app/Providers/FortifyServiceProvider.php')
+                ->removeImport('App\Http\Responses\PasskeyLoginResponse')
+                ->removeImport('Laravel\Passkeys\Contracts\PasskeyLoginResponse');
+
+            $chisel->file('app/Providers/FortifyServiceProvider.php')
+                ->removeLinesContaining('PasskeyLoginResponseContract::class');
+
+            $chisel->file('config/fortify.php')->removeLinesContaining("'passkeys' => 'passkeys',");
+
+            $chisel->file('resources/js/pages/settings/security.tsx')
+                ->removeLinesContaining("from '@/components/manage-passkeys';")
+                ->replace("} & ManagePasskeysProps &\n    ManageTwoFactorProps;", '} & ManageTwoFactorProps;');
+
+            $chisel->file('resources/js/pages/auth/login.tsx')->removeLinesContaining('PasskeyVerify');
+
+            $chisel->file('tests/Feature/Auth/AuthenticationTest.php')
+                ->removeLinesContaining('use Illuminate\Http\Request;');
+
+            $chisel->php('tests/Feature/Auth/AuthenticationTest.php')
+                ->removeImport('Laravel\Passkeys\Contracts\PasskeyLoginResponse');
+
+            $chisel->file('tests/Feature/Settings/SecurityTest.php')
+                ->removeLinesContaining('canManagePasskeys')
+                ->removeLinesContaining("'passkeys', []");
+
+            $removePackages($chisel, '@laravel/passkeys');
+        },
+    )
+    ->apply(function (Chisel $chisel, array $answers) use ($contract, $removePackages): void {
+        $kept = (array) ($answers['modules'] ?? []);
+
+        // The tests that prove this script works only mean something on a
+        // pristine checkout — a project that has used it is done with them.
+        if (array_diff(array_keys($contract['modules']), $kept) !== []) {
+            $chisel->files(...$contract['template_tooling'])->delete();
         }
+
+        // Pieces that only exist for a set of modules go with the last of their
+        // owners (Notes and Posts share the markdown renderer).
+        foreach ($contract['shared_pieces'] as $piece) {
+            if (array_intersect($piece['owners'], $kept) !== []) {
+                continue;
+            }
+
+            $chisel->files(...$piece['owned'])->delete();
+
+            $removePackages($chisel, ...$piece['packages']);
+        }
+
+        // The starter's own README is scaffolding either way: markers stripped
+        // when modules stay, a placeholder to replace when none do (composer run
+        // modules fails while the starter title still stands).
+        if ($kept !== []) {
+            $chisel->file('README.md')->removeSectionMarkers('scaffolding');
+
+            return;
+        }
+
+        $chisel->file('README.md')
+            ->removeSection('scaffolding')
+            ->replace('# Herman Laravel Starter', '# <product name>');
     });

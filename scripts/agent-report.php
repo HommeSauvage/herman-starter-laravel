@@ -13,7 +13,8 @@ declare(strict_types=1);
  *
  * {
  *   "tool": "agent-report", "result": "passed", "tests_result": "passed",
- *   "soak_result": "passed", "tests": 115, "passed": 115, "assertions": 542,
+ *   "soak_result": "passed", "modules_result": "passed", "modules_kept": ["notes"],
+ *   "modules_issues": [], "tests": 115, "passed": 115, "assertions": 542,
  *   "duration_ms": 2147, "routes": 42, "boot_peak_mb": 24.0,
  *   "soak_kb_per_request": 0.07, "container_memory_limit": "256M"
  * }
@@ -45,7 +46,19 @@ $soak = json_decode(trim($run('php scripts/memory-soak.php --json --iterations=1
 $report['soak_result'] = is_array($soak) && ($soak['result'] ?? null) === 'passed' ? 'passed' : 'failed';
 $report['soak_kb_per_request'] = is_array($soak) ? ($soak['steady_slope_kb_per_request'] ?? null) : null;
 
-$report['result'] = $report['tests_result'] === 'passed' && $report['soak_result'] === 'passed' ? 'passed' : 'failed';
+// Optional-module integrity — the same contract `composer run modules` prints.
+// A half-removed module is a broken app with a green-looking rename, so it
+// counts against the report exactly like a failing test.
+$modules = json_decode(trim($run('php scripts/module-integrity.php')), true);
+$report['modules_result'] = is_array($modules) && ($modules['result'] ?? null) === 'passed' ? 'passed' : 'failed';
+$report['modules_kept'] = is_array($modules) ? array_keys(array_filter((array) ($modules['modules'] ?? []))) : null;
+$report['modules_issues'] = is_array($modules) ? ($modules['issues'] ?? []) : null;
+
+$report['result'] = $report['tests_result'] === 'passed'
+    && $report['soak_result'] === 'passed'
+    && $report['modules_result'] === 'passed'
+    ? 'passed'
+    : 'failed';
 
 // Route surface — the wizard's route sweep reads the same list.
 $routes = json_decode($run('php artisan route:list --json'), true);

@@ -3,7 +3,7 @@ import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
-// import { TeamSwitcher } from '@/components/team-switcher';
+import { TeamSwitcher } from '@/components/team-switcher';
 import {
     Sidebar,
     SidebarContent,
@@ -34,12 +34,9 @@ export function AppSidebar() {
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
-                </SidebarMenu>
-                <SidebarMenu>
-                    {/* Uncomment to enable teams in the sidebar
                     <SidebarMenuItem>
                         <TeamSwitcher />
-                    </SidebarMenuItem> */}
+                    </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
 

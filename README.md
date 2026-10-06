@@ -1,339 +1,118 @@
 # Herman Laravel Starter
 
-A production-minded Laravel starter for multi-tenant SaaS apps — teams, auth, and a polished React UI out of the box.
+<!-- @chisel-scaffolding -->
+The Laravel template behind Herman's wizard. An agent turns it into one user's
+product: keep the stack, delete what that product does not need, and replace this
+file with the product's README.
 
-Built on **Laravel 13**, **Inertia v3**, **React 19**, and **Tailwind CSS v4**, with typed Wayfinder routes, Fortify auth (including passkeys & 2FA), and a reference Notes CRUD so new features have a clear quality bar.
+It is not maintained for human readers and never deployed as-is.
 
-[![Laravel](https://img.shields.io/badge/Laravel-13-FF2D20?style=flat-square&logo=laravel&logoColor=white)](https://laravel.com)
-[![Inertia](https://img.shields.io/badge/Inertia-v3-9553E9?style=flat-square)](https://inertiajs.com)
-[![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev)
-[![PHP](https://img.shields.io/badge/PHP-8.3%2B-777BB4?style=flat-square&logo=php&logoColor=white)](https://www.php.net)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
+<!-- @end-chisel-scaffolding -->
+## What is already wired
 
----
+- **Laravel 13 / PHP 8.5**, Inertia v3 + React 19, Tailwind v4, Pest 4
+- **Fortify auth** — registration, email verification, password reset, 2FA, profile and security settings
+- **Multi-tenant teams** — a personal team on registration, invitations, roles, `/{current_team}/…` routes
+- **Typed routes** — Wayfinder helpers in `resources/js/{actions,routes}` (generated; never hand-edit)
+- **Building blocks** — a typed sections library, shadcn primitives, empty/loading/pagination conventions
+- **Gates** — `ci:check`, `agent:report`, `soak`, `preflight`, `modules`, `chisel` (see `composer.json`)
 
-## Why this starter
+## The contract
 
-Most Laravel React kits give you login and a dashboard. Herman goes further:
+`AGENTS.md` is the operating contract for coding agents — conventions, gates and
+floors. Read it before changing anything; this file only explains the starter's
+own machinery.
 
-- **Modern auth** — registration, email verification, password reset, 2FA, and WebAuthn passkeys
-- **Type-safe frontend** — Wayfinder-generated TypeScript for controller actions and routes
-- **Reference CRUD** — a full Notes module (list → show → create/edit, markdown, policies, Pest tests) you can keep or delete
-- **Ship-ready DX** — Pest, Pint, Larastan, ESLint, Prettier, Laravel Boost, Chisel module removal
-- **Agent-grade verification** — `composer run agent:report` (one JSON line: tests, routes, boot memory, memory soak) and `composer run soak` (no per-request memory retention)
-- **Teams included** — create teams, invite members, roles & permissions, team-scoped URLs
+### 1. Resolve the optional modules first
 
-Use it as the base for an AI-assisted product (or a traditional one) and start building features instead of scaffolding.
-
----
-
-## Features
-
-### Authentication
-
-- Email/password registration & login ([Laravel Fortify](https://laravel.com/docs/fortify))
-- Email verification & password reset
-- Two-factor authentication (TOTP)
-- Passkeys (WebAuthn)
-- Profile, password, and security settings UI
-
-### Teams
-
-- Personal team on registration
-- Create & switch teams
-- Invite members by email with roles (`owner`, `admin`, `member`)
-- Team-scoped routes: `/{current_team}/…`
-- Policies and permission enums ready to extend
-
-### Frontend
-
-- Inertia.js v3 + React 19 + TypeScript
-- Tailwind CSS v4 + [shadcn/ui](https://ui.shadcn.com) (New York style)
-- Lucide icons, Sonner toasts, light/dark appearance
-- SSR-capable Vite setup (`bun run build:ssr`)
-
-### Reference modules: Notes & Posts
-
-Two complete, tested examples set the quality bar — keep them as patterns or delete them in one pass.
-
-**Notes** — team-scoped app CRUD behind auth:
-
-| Concern        | Included                                      |
-|----------------|-----------------------------------------------|
-| Backend        | Model, policy, form requests, resource routes |
-| UI             | Index, show, create, edit + markdown editor   |
-| UX             | Empty states, delete confirmation             |
-| Tests          | Pest feature coverage                         |
-
-**Posts** — public read-side content (blog-style):
-
-| Concern        | Included                                          |
-|----------------|---------------------------------------------------|
-| Backend        | Model, `published()` scope, slug route binding    |
-| UI             | Public index (card grid) + show (markdown body)   |
-| UX             | SEO heads, empty states, 404 for unpublished      |
-| Tests          | Pest feature coverage                             |
-
-**Don’t need them?** Delete each module wholesale — see [Removing the Notes module](#removing-the-notes-module) and [Removing the Posts module](#removing-the-posts-module). Files are tagged with `REFERENCE MODULE` comments.
-
-### Quality & tooling
-
-- [Pest](https://pestphp.com) feature tests
-- [Laravel Pint](https://laravel.com/docs/pint) + ESLint + Prettier
-- [Larastan](https://github.com/larastan/larastan) / PHPStan
-- [Laravel Wayfinder](https://github.com/laravel/wayfinder) typed route helpers
-- [Laravel Boost](https://github.com/laravel/boost) MCP + agent skills for AI-assisted development
-
----
-
-## Tech stack
-
-| Layer        | Choice                                      |
-|--------------|---------------------------------------------|
-| Backend      | Laravel 13, PHP 8.3+                        |
-| Auth         | Fortify (+ passkeys)                        |
-| SPA bridge   | Inertia Laravel / React v3                  |
-| UI           | React 19, Tailwind CSS v4, shadcn/ui        |
-| Routes (TS)  | Wayfinder                                   |
-| Bundler      | Vite 8 + Bun (or npm/pnpm/yarn)             |
-| Tests        | Pest 4                                      |
-| Static analysis | Larastan / PHPStan                       |
-
----
-
-## Requirements
-
-- PHP 8.3+ (8.5 recommended)
-- [Composer](https://getcomposer.org)
-- [Bun](https://bun.sh) (preferred) or Node.js 20+
-- SQLite (default) or MySQL / PostgreSQL
-
----
-
-## Quick start
+Before the first `php artisan migrate` (a dropped module's migration is deleted,
+not rolled back) and after `bun install`:
 
 ```bash
-git clone https://github.com/HommeSauvage/herman-starter-laravel.git
-cd herman-starter-laravel
-
-composer setup
+composer run chisel -- --answers='{"modules":["notes"]}'   # keep Notes, drop the rest
+composer run chisel -- --answers='{"modules":[]}'          # drop all three
 ```
 
-`composer setup` installs PHP deps, copies `.env`, generates the app key, runs migrations, installs JS deps, and builds assets.
+<!-- @chisel-notes -->
+**Notes** — team-scoped CRUD behind auth: model, policy, form requests, resource
+routes, list → detail → create/edit pages, markdown editor, delete confirmation,
+Pest coverage. The quality bar for "a list with detail and create/edit".
+<!-- @end-chisel-notes -->
 
-Then start the full local stack:
+<!-- @chisel-posts -->
+**Posts** — public read-side content: `published()` scope, slug route binding,
+card-grid index with pagination, markdown detail page, SEO heads, empty states,
+Pest coverage. The quality bar for public pages.
+<!-- @end-chisel-posts -->
 
-```bash
-composer run dev
-```
+<!-- @chisel-passkeys -->
+**Passkeys** — WebAuthn sign-in and management on top of Fortify. The Composer
+package stays (Fortify requires it); the feature, routes, table, components and
+the `@laravel/passkeys` dependency go.
+<!-- @end-chisel-passkeys -->
 
-Visit [http://localhost:8000](http://localhost:8000).
+A module is either fully present or fully gone — never half. Hand-deleting leaves
+residue (dead routes, dead UI, tests that no longer run, docs describing features
+that are gone), and both `php artisan test` and `composer run modules` fail on
+it. `chisel.modules.php` is the contract, `chisel.php` is the removal.
 
-### Seed demo data
+### 2. Replace this file
 
-```bash
-php artisan db:seed
-```
+The product's README is written in the foundation milestone: the product name,
+what it does, how to run it, the demo logins. The starter text is scaffolding —
+once the optional modules are gone, the suite fails while this file is still the
+starter's.
 
-Creates `test@example.com` / `password` with sample Notes on their current team.
-
-### Manual setup (alternative)
-
-```bash
-composer install
-cp .env.example .env
-php artisan key:generate
-php artisan migrate
-bun install
-bun run build
-composer run dev
-```
-
-### Custom port
-
-```bash
-SERVER_PORT=8001 APP_URL=http://localhost:8001 composer run dev
-```
-
----
-
-## Project structure
+## Where things live
 
 ```
 app/
-├── Http/Controllers/
-│   ├── Notes/              # REFERENCE MODULE (app CRUD)
-│   ├── Public/             # REFERENCE MODULE (public content)
-│   ├── Settings/
-│   └── Teams/
-├── Models/                 # User, Team, Membership, Note, Post, …
-├── Policies/
-└── Enums/                  # TeamRole, TeamPermission
-
+├── Http/Controllers/     # Notes/, Public/, Settings/, Teams/, DashboardController
+├── Models/               # User, Team, Membership, Note, Post
+├── Policies/  Enums/     # TeamRole, TeamPermission
 resources/js/
-├── components/             # UI + feature + sections/ + shared state components
-├── pages/                  # Inertia pages (public/, auth, teams, notes, …)
-├── layouts/                # app/, auth/, settings/, public-layout.tsx
-├── lib/nav.ts              # Nav registry (public + app sidebar)
-└── actions/ | routes/      # Wayfinder-generated (do not hand-edit)
-
+├── components/           # feature components + sections/ + ui/ (shadcn)
+├── pages/                # Inertia pages (public/, auth, settings, teams, notes)
+├── layouts/              # public-layout.tsx, app-layout.tsx, auth, settings
+├── lib/nav.ts            # navigation registry (public + app sidebar)
+└── actions/ | routes/    # Wayfinder-generated — do not hand-edit
 routes/
-└── web/                    # One file per domain — routes/web.php globs them
-
-tests/Feature/              # Pest tests (incl. Notes, Posts, Teams, Auth)
+└── web/                  # one file per domain; routes/web.php globs them
+herman-docs/              # beginner docs written by the wizard's docs phase
 ```
 
-Web routes live in `routes/web/*.php` — one file per domain (`public.php`, `app.php`, `settings.php`). `routes/web.php` is just the loader: add a file and its routes register automatically. Team-scoped app routes live under `{current_team}` in `routes/web/app.php`.
+Web routes live in `routes/web/*.php` — one file per domain (`public.php`,
+`app.php`, `settings.php`). `routes/web.php` is only the loader: add a file and
+its routes register automatically. Team-scoped routes live under `{current_team}`.
 
----
+## Development
 
-## Frontend conventions
+| Command | Purpose |
+|---|---|
+| `composer run dev` | PHP server, queue, logs, Vite |
+| `composer run ci:check` | ESLint, Prettier, `tsc`, fallow, Pint, PHPStan, Pest — the gate |
+| `composer run agent:report` | One JSON line: tests, soak, routes, boot memory |
+| `composer run modules` | One JSON line: optional-module state and residue |
+| `composer run chisel` | Remove optional modules |
+| `composer run soak` | Prove requests retain no memory |
+| `composer run preflight` | One line per environment fact |
+| `composer setup` | Install everything, build assets, install git hooks |
 
-- Pages: `resources/js/pages/**`
-- Prefer Wayfinder imports over hardcoded URLs:
+`composer setup` installs [lefthook](https://lefthook.dev) git hooks: every
+`git commit` runs `composer run ci:check` as a pre-commit gate. Bypass only in
+emergencies with `--no-verify`.
 
-  ```ts
-  import { index } from '@/actions/App/Http/Controllers/Notes/NoteController'
-  // or named routes from `@/routes`
-  ```
+Filter tests while iterating: `php artisan test --compact --filter=Note`.
 
-- After adding routes or controllers, regenerate Wayfinder helpers (usually via Vite / `php artisan wayfinder:generate` as configured in your workflow).
-- UI primitives live under `resources/js/components/ui` (shadcn).
+## Runtime notes
 
----
-
-## Development scripts
-
-| Command                    | Purpose                                      |
-|----------------------------|----------------------------------------------|
-| `composer run dev`         | PHP server, queue, logs, Vite                |
-| `composer test`            | Pint check + PHPStan + Pest                  |
-| `composer run ci:check`    | Frontend lint/format/types + fallow + `composer test` |
-| `vendor/bin/pint`          | Format PHP                                   |
-| `bun run lint` / `format`  | ESLint / Prettier                            |
-| `bun run types:check`      | TypeScript                                   |
-| `bun run deadcode:check`   | fallow dead-code gate (unused files/exports/deps) |
-| `php artisan test`         | Pest only                                    |
-
-`composer setup` also installs [lefthook](https://lefthook.dev) git hooks: every `git commit` runs `composer run ci:check` as a pre-commit gate. Bypass only in emergencies with `--no-verify`.
-
-Filter tests while iterating:
-
-```bash
-php artisan test --compact --filter=Note
-```
-
----
-
-## Removing the Notes module
-
-If your product does not need Notes, remove the full feature — do not leave half of it behind.
-
-**Let Chisel do it** (run before the first `php artisan migrate`):
-
-```bash
-composer run chisel -- --answers='{"modules":["posts"]}'   # keep Posts, drop Notes
-```
-
-It deletes the files below, strips the marked UI/routes/tests, prunes the imports and uninstalls the optional dependency. The checklist is the manual fallback.
-
-**Backend**
-
-- `app/Models/Note.php`
-- `app/Policies/NotePolicy.php`
-- `app/Http/Controllers/Notes/`
-- `app/Http/Requests/Notes/`
-- `database/migrations/*_create_notes_table.php`
-- `database/factories/NoteFactory.php`
-- Notes seed block in `DatabaseSeeder` (the `Note::upsert(…)` call and the `$team` assignment it uses)
-- `Route::resource('notes', …)` in `routes/web/app.php`
-- Notes props in `app/Http/Controllers/DashboardController.php` (`stats.notes`, `recentNotes` — marked `REFERENCE MODULE`)
-- Notes-specific tests in `tests/Feature/DashboardTest.php` (the "recent notes" tests)
-- `Team::notes()` relation
-- `tests/Feature/Notes/`
-
-**Frontend**
-
-- `resources/js/pages/notes/`
-- `resources/js/components/notes/`
-- Notes entries in `resources/js/lib/nav.ts` (marked `REFERENCE MODULE`)
-- Notes widgets in `resources/js/pages/dashboard.tsx` (stat card, recent notes, quick action — marked `REFERENCE MODULE`)
-- `resources/js/components/markdown-body.tsx` — shared with Posts; delete only if Posts is removed too
-
-**Optional deps**
-
-- `@uiw/react-md-editor` (Notes only)
-- `react-markdown` (shared with Posts — remove only if Posts is removed too)
-
-Chisel also removes the Notes section from `AGENTS.md`; do it by hand only if you removed the module manually.
-
----
-
-## Removing the Posts module
-
-If your product does not need public content, remove the full feature — do not leave half of it behind.
-
-**Let Chisel do it** (run before the first `php artisan migrate`):
-
-```bash
-composer run chisel -- --answers='{"modules":["notes"]}'   # keep Notes, drop Posts
-```
-
-It handles everything in the checklist below, including the nav entry, the seeder block and the shared markdown pieces when both modules go.
-
-**Backend**
-
-- `app/Models/Post.php`
-- `app/Http/Controllers/Public/`
-- `database/migrations/*_create_posts_table.php`
-- `database/factories/PostFactory.php`
-- Posts seed block in `DatabaseSeeder`
-- Posts routes in `routes/web/public.php`
-- `tests/Feature/Posts/`
-
-**Frontend**
-
-- `resources/js/pages/public/posts/`
-- Blog entry in `resources/js/lib/nav.ts` (`publicNav`, marked `REFERENCE MODULE`)
-- `resources/js/components/markdown-body.tsx` — shared with Notes; delete only if Notes is removed too
-
-**Optional deps**
-
-- `react-markdown` (shared with Notes — remove only if Notes is removed too)
-
-Also remove the Posts section from `AGENTS.md` if you keep that file for AI agents.
-
----
-
-## Configuration notes
-
-- Default database is **SQLite** (`DB_CONNECTION=sqlite`). Switch in `.env` for production.
-- Sessions, cache, and queue default to the database driver — fine for local; tune for production.
-- Passkeys use your `APP_URL` as relying party / origin — keep `APP_URL` accurate in every environment.
-
-### Docker / production image
-
-The repo ships a production `Dockerfile` (multi-stage: bun/vite build →
-FrankenPHP + pdo_sqlite) plus `docker/entrypoint.sh` and `litestream.yml`
-for the SQLite data plane (restore-if-empty → migrate → replicate). Build
-with `docker build -t my-app .`. Runtime configuration arrives via
-deployment env (never build args); `DB_DATABASE` points at the SQLite file
-and `LITESTREAM_*` configure replication when used. The app trusts
-`X-Forwarded-*` so absolute URLs stay `https://` behind a TLS-terminating
-proxy. Deploy anywhere you can run a container — or Laravel Cloud.
-
----
-
-## Contributing
-
-Issues and pull requests are welcome. Please:
-
-1. Keep changes focused and consistent with existing conventions
-2. Add or update Pest tests for behavioral changes
-3. Run `composer run ci:check` (or the relevant subset) before opening a PR
-
----
+- Default database is **SQLite** (`DB_CONNECTION=sqlite`); switch in `.env` for MySQL or PostgreSQL.
+- Sessions, cache and queue default to the database driver — fine locally, tune for production.
+- The repo ships a production `Dockerfile` (multi-stage: bun/vite build → FrankenPHP + `pdo_sqlite`) with `docker/entrypoint.sh` and `litestream.yml` for the SQLite data plane (restore-if-empty → migrate → replicate). Runtime configuration arrives as deployment env, never build args; the app trusts `X-Forwarded-*` so absolute URLs stay `https://` behind a TLS-terminating proxy.
+<!-- @chisel-passkeys -->
+- Passkeys use `APP_URL` as relying party and origin — keep `APP_URL` accurate in every environment.
+<!-- @end-chisel-passkeys -->
 
 ## License
 
-This project is open-sourced software licensed under the [MIT license](LICENSE).
+MIT — see [LICENSE](LICENSE).

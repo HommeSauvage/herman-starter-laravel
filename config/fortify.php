@@ -133,6 +133,7 @@ return [
 
     'views' => true,
 
+    /* @chisel-passkeys */
     /*
     |--------------------------------------------------------------------------
     | Passkeys
@@ -148,6 +149,7 @@ return [
         'user_handle_secret' => env('PASSKEYS_USER_HANDLE_SECRET', config('app.key')),
         'timeout' => 60000,
     ],
+    /* @end-chisel-passkeys */
 
     /*
     |--------------------------------------------------------------------------
@@ -169,9 +171,11 @@ return [
             'confirmPassword' => true,
             // 'window' => 0
         ]),
+        /* @chisel-passkeys */
         Features::passkeys([
             'confirmPassword' => true,
         ]),
+        /* @end-chisel-passkeys */
     ],
 
 ];

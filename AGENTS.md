@@ -1,65 +1,259 @@
 # AGENTS.md
 
-Operating contract for coding agents in this repository. Every rule here is load-bearing — follow them exactly, even when a one-off alternative looks easier.
+Operating contract for agents on this repo. This is a template for Herman's wizard: an agent turns it into one user's product.
 
-## How we work
+## Rules
 
-- **Scaffold, don't invent.** Never open a blank controller, model, migration, page or test. Copy the closest reference module (Notes for app CRUD, Posts for public pages) and rename — that is how the codebase stays one codebase. New shared building blocks are a last resort; extend an existing one.
-- **The gate is the contract.** `composer run ci:check` green is what "done" means — not "the code looks right".
-- Framework conventions live in `.agents/skills/**` and Boost — consult those instead of guessing; this file records project invariants only.
-- Don't change dependencies, don't create new base folders, don't create documentation files — unless the user asks.
-- Be concise in replies; focus on what matters, skip the obvious.
+- **Scaffold, don't invent.** Copy the closest reference module and rename; never open a blank controller, model, migration, page or test.
+- **Trim as you go.** What the product does not use is deleted in the same pass that makes it unused.
+- **The gate is the contract.** `composer run ci:check` green means done.
+- Do not change dependencies, add base folders, or write documentation files unless asked.
+- Read framework conventions from `.agents/skills/**` and Boost; follow them instead of guessing.
 
-## Stack & tools
+## Stack
 
-- Laravel 13 / PHP 8.5 / Inertia v3 + React 19 / Tailwind v4 / Pest 4; versions in `composer.json` / `package.json`.
-- Boost MCP (`search-docs`, `database-schema`, `database-query`, `browser-logs`) is the source of truth for framework APIs and DB state — prefer it over guessing or grepping `vendor/`; create files with `php artisan make:* --no-interaction`.
+Laravel 13 / PHP 8.5 / Inertia v3 + React 19 / Tailwind v4 / Pest 4. Create files with `php artisan make:* --no-interaction`. Check framework APIs and DB state with Boost MCP (`search-docs`, `database-schema`, `database-query`, `browser-logs`) before grepping `vendor/`.
 
-## Quality gates
+## Gates
 
-- `composer run ci:check` — ESLint, Prettier, `tsc`, fallow, Pint, PHPStan, Pest. The lefthook pre-commit hook runs exactly this; never use `--no-verify` to dodge a red gate.
-- `composer run agent:report` prints one JSON line (tests, soak, routes, boot memory) — use it to verify work instead of pasting raw test output. `composer run soak` proves requests retain no memory: no mutable static state in `app/`, no per-request growth.
-- Tests: feature tests by default, models via factories; never delete tests without approval. Prove behavior with a test, not a throwaway script.
+- `composer run ci:check` — ESLint, Prettier, `tsc`, fallow, Pint, PHPStan, Pest, soak; the lefthook hook runs exactly this. Never use `--no-verify`.
+- `composer run modules` — optional-module integrity; `php artisan test` enforces it. Never answer a finding by widening `.fallowrc.jsonc`, deleting the test, or ignoring the file.
+- `composer run agent:report` — one JSON line (tests, soak, modules, routes, boot memory).
+- Feature tests by default, models via factories; never delete tests without approval.
 
-## Routes & frontend wiring
+## Modules
 
-- `routes/web.php` is only a loader: it globs every `routes/web/*.php` in sorted order. One file per domain (`public.php`, `app.php`, `settings.php`) — add/edit files, never the loader.
-- After adding routes or controllers, regenerate Wayfinder helpers: `php artisan wayfinder:generate --with-form`. `resources/js/actions/` and `resources/js/routes/` are generated — never hand-edit them.
-- The frontend calls the backend through Wayfinder functions (`@/actions/...`, `@/routes/...`) — never hardcoded URLs. In PHP, prefer named routes and `route()`.
-- New API routes default to Eloquent API Resources and versioning.
-
-## Pages, layouts & SEO
-
-- Public pages live in `resources/js/pages/public/` and get `PublicLayout` automatically (resolver in `resources/js/app.tsx`). Never put a public page outside `public/`; never point `default:` away from `AppLayout`.
-- Navigation lives in the registry `resources/js/lib/nav.ts` (`publicNav`, `appNav()`, `appFooterNav`) — header, mobile menu, footer and sidebar all render from it. Add entries there, not in components.
-- Every page renders `<Seo title … description? />` (`resources/js/components/seo.tsx`); never raw `<Head>` — the app name is appended automatically.
-
-## Design tokens
-
-- Token values live in `resources/css/app.css` (`:root`, `.dark`, `--radius`). Change values; never rename token variables or the `@theme` `--color-*` mapping.
-- Fonts come from the `bunny(...)` declaration in `vite.config.ts` and are self-hosted at build time — never add a runtime font CDN link.
-- Never hardcode colors in components — use token utilities (`bg-background`, `text-muted-foreground`, …).
-- Never edit `components/ui/*` primitives (shadcn) — compose them (see `components/sections/`). Add a primitive with `bunx shadcn add <component>` only when composition genuinely cannot cover it.
-
-## Building blocks (compose, don't invent)
-
-- `layouts/public-layout.tsx` — public chrome (sticky header, mobile menu, footer); auto-applied to `pages/public/**`.
-- `components/sections/*` — hero, page-header, feature-grid/rows, stats-band, testimonial-band, pricing-table, faq, cta-band, card-grid (token-only; list-driven ones render `EmptyState` when empty).
-- Shared: `empty-state`, `loading-state`, `pagination`, `search-input`, `stat-card`, `media-image`, `markdown-body` (`.tsx`).
-- List pages recipe: compose like `resources/js/pages/notes/index.tsx`. Loading convention: deferred props → skeleton, form submits → the form's `processing` state, everything else → spinner.
-
-## Reference modules
+Three optional modules ship as references and leave via `composer run chisel`, never by hand. Run it before the first `php artisan migrate` and after `bun install`. A module is either fully present or fully gone — `composer run modules` fails on half-removal. `chisel.modules.php` defines what each owns; `chisel.php` removes it.
 
 <!-- @chisel-notes -->
-- **Notes** (`pages/notes`, `components/notes`, `NoteController`) — team-scoped app CRUD quality bar. When a feature is "a list with detail and create/edit", make it look like Notes.
+- **Notes** (`pages/notes`, `components/notes`, `NoteController`) — team-scoped CRUD quality bar.
 <!-- @end-chisel-notes -->
 <!-- @chisel-posts -->
-- **Posts** (`pages/public/posts`, `Public/PostController`) — public read-side content quality bar (pagination, markdown, empty states).
+- **Posts** (`pages/public/posts`, `Public/PostController`) — public read-side quality bar.
 <!-- @end-chisel-posts -->
-- Removable wholesale: `composer run chisel` deletes files, routes, tests and optional deps. Never half-delete one.
+<!-- @chisel-passkeys -->
+- **Passkeys** (`components/passkey-*`, Fortify WebAuthn) — passwordless sign-in.
+<!-- @end-chisel-passkeys -->
+
+## Wiring
+
+- `routes/web.php` is a loader that globs `routes/web/*.php`; one file per domain, never edit the loader.
+- After route changes run `php artisan wayfinder:generate --with-form`. `resources/js/{actions,routes}` are generated — never hand-edit; call the backend through them, never hardcoded URLs.
+- Prefer named routes in PHP; new API routes default to Eloquent API Resources and versioning.
+- Public pages live in `resources/js/pages/public/` and get `PublicLayout` automatically.
+- Navigation lives in the registry `resources/js/lib/nav.ts`; header, mobile menu, footer and sidebar render from it.
+- Every page renders `<Seo title … />`, never raw `<Head>`.
+
+## UI
+
+- Tokens live in `resources/css/app.css` (`:root`, `.dark`, `--radius`); change values, never rename variables or the `@theme` mapping. Never hardcode colors — use token utilities.
+- Fonts come from the `bunny(...)` declaration in `vite.config.ts`, self-hosted at build time; never a runtime CDN link.
+- Never edit `components/ui/*` (shadcn) — compose them. Add a primitive with `bunx shadcn add` only when composition cannot cover it.
+- Blocks: `components/sections/*` (hero, page-header, feature-grid/rows, stats-band, testimonial-band, pricing-table, faq, cta-band, card-grid), `layouts/public-layout.tsx`, and shared `empty-state`, `pagination`, `search-input`, `stat-card`, `media-image`, `markdown-body`. List pages compose like `resources/js/pages/notes/index.tsx`. Loading: deferred props → `Skeleton`, form submits → the form's `processing` state, else `Spinner`.
+
+## Docs
+
+`README.md` belongs to the product: replace it in the foundation milestone. Trim this file the same way — it describes the product's invariants, not the template's.
 
 ## Misc
 
-- Change dev port: `SERVER_PORT=8001 APP_URL=http://localhost:8001 composer run dev`.
-- Frontend changes not showing, or a Vite "unable to locate file in manifest" error? The user needs `bun run dev` / `bun run build` — ask them.
-- Tooling looks wrong (PHP extension, bun, missing dirs)? `composer run preflight` prints a one-line-per-fact checklist.
+- Change the dev port: `SERVER_PORT=8001 APP_URL=http://localhost:8001 composer run dev`.
+- Frontend changes not showing, or a Vite 'unable to locate file in manifest' error: the user needs `bun run dev` / `bun run build` — ask them.
+- Tooling looks wrong: `composer run preflight` prints a one-line-per-fact checklist.
+
+===
+
+<laravel-boost-guidelines>
+=== foundation rules ===
+
+# Laravel Boost Guidelines
+
+## Foundational Context
+
+This application is a Laravel application running on PHP 8.5. Always use the APIs that match the installed major version of each package — do not assume a version.
+
+Before relying on a package's API, confirm its installed version:
+- PHP packages: run `composer show --direct` to list direct dependencies with versions, or `composer show <vendor/package>` for a single package.
+- JS packages: check `package.json` for the installed versions.
+
+## Skills Activation
+
+This project has domain-specific skills available in `**/skills/**`. You MUST activate the relevant skill whenever you work in that domain—don't wait until you're stuck.
+
+## Conventions
+
+- You must follow all existing code conventions used in this application. When creating or editing a file, check sibling files for the correct structure, approach, and naming.
+- Use descriptive names for variables and methods. For example, `isRegisteredForDiscounts`, not `discount()`.
+- Check for existing components to reuse before writing a new one.
+
+## Verification Scripts
+
+- Do not create verification scripts or tinker when tests cover that functionality and prove they work. Unit and feature tests are more important.
+
+## Application Structure & Architecture
+
+- Stick to existing directory structure; don't create new base folders without approval.
+- Do not change the application's dependencies without approval.
+
+## Frontend Bundling
+
+- If a frontend change doesn't show in the UI or you get a "Unable to locate file in Vite manifest" error, run `bun run build` or ask the user to run `bun run dev` or `composer run dev`.
+
+## Documentation Files
+
+- You must only create documentation files if explicitly requested by the user.
+
+=== boost rules ===
+
+# Laravel Boost
+
+## Tools
+
+- Laravel Boost is an MCP server with tools designed specifically for this application. Prefer Boost tools over manual alternatives like shell commands or file reads.
+- Use `database-query` to run read-only queries against the database instead of writing raw SQL in tinker.
+- Use `database-schema` to inspect table structure before writing migrations or models.
+- Use `get-absolute-url` to resolve the correct scheme, domain, and port for project URLs. Always use this before sharing a URL with the user.
+- Use `browser-logs` to read browser logs, errors, and exceptions. Only recent logs are useful, ignore old entries.
+
+## Searching Documentation (IMPORTANT)
+
+- Use `search-docs` before changes that depend on Laravel ecosystem APIs, behavior, configuration, or version-specific syntax. Skip it for copy-only edits and other changes where package documentation is irrelevant. Reuse sufficient results already in context instead of searching again.
+- Pass a `packages` array to scope results when you know which packages are relevant.
+- Use multiple broad, topic-based queries: `['rate limiting', 'routing rate limiting', 'routing']`. Expect the most relevant results first.
+- Do not add package names to queries because package info is already shared. Use `test resource table`, not `filament 4 test resource table`.
+
+### Search Syntax
+
+1. Use words for auto-stemmed AND logic: `rate limit` matches both "rate" AND "limit".
+2. Use `"quoted phrases"` for exact position matching: `"infinite scroll"` requires adjacent words in order.
+3. Combine words and phrases for mixed queries: `middleware "rate limit"`.
+4. Use multiple queries for OR logic: `queries=["authentication", "middleware"]`.
+
+## Project Rules
+
+- This project contains committed, area-grouped rules in `.ai/rules` when that directory exists, including path-scoped framework guidelines under `.ai/rules/boost`. Before you enter plan mode or create/edit any file, you MUST first: open @.ai/rules/index.md (it maps file globs to rule files), read every rule file whose globs cover the path(s) in scope, and run `grep -rin 'keyword' .ai/rules` to catch what a path match alone misses. Do not write code until you have read and are following every matching rule. If `.ai/rules` does not exist, continue without it.
+
+## Artisan
+
+- Run Artisan commands directly via the command line (e.g., `php artisan route:list`). Use `php artisan list` to discover available commands and `php artisan [command] --help` to check parameters.
+- Inspect routes with `php artisan route:list`. Filter with: `--method=GET`, `--name=users`, `--path=api`, `--except-vendor`, `--only-vendor`.
+- Read configuration values using dot notation: `php artisan config:show app.name`, `php artisan config:show database.default`. Or read config files directly from the `config/` directory.
+
+## Tinker
+
+- Execute PHP in app context for debugging and testing code. Do not create models without user approval, prefer tests with factories instead. Prefer existing Artisan commands over custom tinker code.
+- Always use single quotes to prevent shell expansion: `php artisan tinker --execute 'Your::code();'`
+  - Double quotes for PHP strings inside: `php artisan tinker --execute 'User::where("active", true)->count();'`
+
+=== php rules ===
+
+# PHP
+
+- Always use curly braces for control structures, even for single-line bodies.
+- Use PHP 8 constructor property promotion: `public function __construct(public GitHub $github) { }`. Do not leave empty zero-parameter `__construct()` methods unless the constructor is private.
+- Use explicit return type declarations and type hints for all method parameters: `function isAccessible(User $user, ?string $path = null): bool`
+- Use TitleCase for Enum keys: `FavoritePerson`, `BestLake`, `Monthly`.
+- Prefer PHPDoc blocks over inline comments. Only add inline comments for exceptionally complex logic.
+- Use array shape type definitions in PHPDoc blocks.
+
+=== deployments rules ===
+
+# Deployment
+
+- Laravel can be deployed using [Laravel Cloud](https://cloud.laravel.com/), which is the fastest way to deploy and scale production Laravel applications.
+
+=== tests rules ===
+
+# Test Enforcement
+
+- Add or update tests for behavior and logic changes when a test provides meaningful regression coverage.
+- Pure copy, styling, and layout-only changes do not require new or updated tests.
+- When test coverage applies, run the affected tests and ensure they pass.
+- Test the changed behavior and its important failure modes, but do not add tests beyond them.
+- Read the `testing-best-practices` skill before writing tests.
+
+=== inertia-laravel/core rules ===
+
+# Inertia
+
+- Inertia creates fully client-side rendered SPAs without modern SPA complexity, leveraging existing server-side patterns.
+- Components live in `resources/js/pages` (unless specified in `vite.config.js`). Use `Inertia::render()` for server-side routing instead of Blade views.
+- ALWAYS use `search-docs` tool for version-specific Inertia documentation and updated code examples.
+- IMPORTANT: Activate `inertia-react-development` when working with Inertia client-side patterns.
+
+# Inertia v3
+
+- Use all Inertia features from v1, v2, and v3. Check the documentation before making changes to ensure the correct approach.
+- New v3 features: standalone HTTP requests (`useHttp` hook), optimistic updates with automatic rollback, layout props (`useLayoutProps` hook), instant visits, simplified SSR via `@inertiajs/vite` plugin, custom exception handling for error pages.
+- Carried over from v2: deferred props, infinite scroll, merging props, polling, prefetching, once props, flash data.
+- When using deferred props, add an empty state with a pulsing or animated skeleton.
+- Axios has been removed. Use the built-in XHR client with interceptors, or install Axios separately if needed.
+- `Inertia::lazy()` / `LazyProp` has been removed. Use `Inertia::optional()` instead.
+- Prop types (`Inertia::optional()`, `Inertia::defer()`, `Inertia::merge()`) work inside nested arrays with dot-notation paths.
+- SSR works automatically in Vite dev mode with `@inertiajs/vite` - no separate Node.js server needed during development.
+- Event renames: `invalid` is now `httpException`, `exception` is now `networkError`.
+- `router.cancel()` replaced by `router.cancelAll()`.
+- The `future` configuration namespace has been removed - all v2 future options are now always enabled.
+
+=== laravel/core rules ===
+
+# Do Things the Laravel Way
+
+- Use `php artisan make:` commands to create new files (i.e. migrations, controllers, models, etc.). You can list available Artisan commands using `php artisan list` and check their parameters with `php artisan [command] --help`.
+- If you're creating a generic PHP class, use `php artisan make:class`.
+- Pass `--no-interaction` to all Artisan commands to ensure they work without user input. You should also pass the correct `--options` to ensure correct behavior.
+
+### Model Creation
+
+- When creating new models, create useful factories and seeders for them too. Ask the user if they need any other things, using `php artisan make:model --help` to check the available options.
+
+## APIs & Eloquent Resources
+
+- For APIs, default to using Eloquent API Resources and API versioning unless existing API routes do not, then you should follow existing application convention.
+
+## URL Generation
+
+- When generating links to other pages, prefer named routes and the `route()` function.
+
+## Testing
+
+- When creating models for tests, use the factories for the models. Check if the factory has custom states that can be used before manually setting up the model.
+- Faker: Use methods such as `$this->faker->word()` or `fake()->randomDigit()`. Follow existing conventions whether to use `$this->faker` or `fake()`.
+- When creating tests, make use of `php artisan make:test [options] {name}` to create a feature test, and pass `--unit` to create a unit test. Most tests should be feature tests.
+
+=== wayfinder/core rules ===
+
+# Laravel Wayfinder
+
+Use Wayfinder to generate TypeScript functions for Laravel routes. Import from `@/actions/` (controllers) or `@/routes/` (named routes).
+
+=== pint/core rules ===
+
+# Laravel Pint Code Formatter
+
+- If you have modified any PHP files, you must run `vendor/bin/pint --dirty --format agent` before finalizing changes to ensure your code matches the project's expected style.
+- Do not run `vendor/bin/pint --test --format agent`, simply run `vendor/bin/pint --format agent` to fix any formatting issues.
+
+=== pest/core rules ===
+
+# Pest
+
+- This project uses Pest. Create tests with `php artisan make:test --pest {name}`.
+- Do not include the test suite directory in `{name}`. Use `SomeFeatureTest`, not `Feature/SomeFeatureTest`.
+- Read the `testing-best-practices` skill for guidance on coverage, naming, structure, dependency isolation, and review.
+- Do not delete tests or test files without approval. They are part of the application.
+
+## Running Tests
+
+- Run the narrowest set of tests that covers the change. Pass a file path or `--filter=testName` to `php artisan test --compact`.
+- Rerun a test after each change to it.
+- Run `vendor/bin/pest` to call the test runner directly. It accepts the same file path and `--filter=testName` arguments.
+- After the feature tests pass, ask the user to run the complete suite with `php artisan test --compact`.
+
+=== inertia-react/core rules ===
+
+# Inertia + React
+
+- IMPORTANT: Activate `inertia-react-development` when working with Inertia React client-side patterns.
+
+</laravel-boost-guidelines>

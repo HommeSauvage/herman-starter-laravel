@@ -51,6 +51,21 @@ function removeChiselSandbox(string $sandbox): void
 }
 
 /**
+ * The gate the chiselled project has to satisfy — `composer run modules`.
+ * Chisel and the gate read the same contract (chisel.modules.php), so this is
+ * what proves the two agree: every removal option leaves a project with no
+ * residue for the gate to complain about.
+ */
+function assertChiselOutputPassesModuleGate(string $sandbox): void
+{
+    $output = [];
+
+    exec('php '.escapeshellarg($sandbox.'/scripts/module-integrity.php').' '.escapeshellarg($sandbox).' 2>&1', $output, $status);
+
+    Assert::assertSame(0, $status, 'The chiselled project fails the module gate: '.implode(' ', $output));
+}
+
+/**
  * @param  list<string>  $paths
  */
 function assertChiselPhpLints(string $sandbox, array $paths): void
@@ -80,6 +95,8 @@ test('keeps both modules and only strips the chisel markers', function () {
 
         $this->assertStringContainsString('notesIndex', $nav);
         $this->assertStringContainsString('postsIndex', $nav);
+
+        assertChiselOutputPassesModuleGate($sandbox);
     } finally {
         removeChiselSandbox($sandbox);
     }
@@ -145,6 +162,8 @@ test('drops notes without leaving references behind', function () {
         $this->assertStringNotContainsString('notesIndex', $nav);
         $this->assertStringContainsString('postsIndex', $nav);
         $this->assertStringNotContainsString('@chisel-', $nav);
+
+        assertChiselOutputPassesModuleGate($sandbox);
     } finally {
         removeChiselSandbox($sandbox);
     }
@@ -181,6 +200,8 @@ test('drops posts without leaving references behind', function () {
         $this->assertStringContainsString('notesIndex', $nav);
 
         $this->assertStringNotContainsString('**Posts**', (string) file_get_contents($sandbox.'/AGENTS.md'));
+
+        assertChiselOutputPassesModuleGate($sandbox);
     } finally {
         removeChiselSandbox($sandbox);
     }
@@ -244,6 +265,8 @@ test('drops both modules and the shared markdown pieces', function () {
         $this->assertStringNotContainsString('**Notes**', $agents);
         $this->assertStringNotContainsString('**Posts**', $agents);
         $this->assertStringNotContainsString('@chisel-', $agents);
+
+        assertChiselOutputPassesModuleGate($sandbox);
     } finally {
         removeChiselSandbox($sandbox);
     }

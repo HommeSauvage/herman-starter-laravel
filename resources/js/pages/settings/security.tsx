@@ -130,10 +130,12 @@ export default function Security(props: Props) {
                 twoFactorEnabled={props.twoFactorEnabled}
             />
 
+            {/* @chisel-passkeys */}
             <ManagePasskeys
                 canManagePasskeys={props.canManagePasskeys}
                 passkeys={props.passkeys}
             />
+            {/* @end-chisel-passkeys */}
         </>
     );
 }

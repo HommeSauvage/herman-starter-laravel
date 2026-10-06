@@ -3,6 +3,7 @@
 use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Notification;
+use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Fortify\Features;
 
 beforeEach(function () {
@@ -39,6 +40,19 @@ test('reset password screen can be rendered', function () {
 
         return true;
     });
+});
+
+test('reset password screen never hands a null email to the form', function () {
+    // A bare reset link (no ?email=) used to pass a null into a controlled
+    // input, which the browser gate rejects as a console error on every run.
+    $response = $this->get(route('password.reset', 'token-without-an-email'));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('auth/reset-password')
+        ->where('email', '')
+        ->where('token', 'token-without-an-email'),
+    );
 });
 
 test('password can be reset with valid token', function () {

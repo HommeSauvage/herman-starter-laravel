@@ -12,9 +12,11 @@ test('security page is displayed', function () {
         'confirm' => true,
         'confirmPassword' => true,
     ]);
+    /* @chisel-passkeys */
     Features::passkeys([
         'confirmPassword' => true,
     ]);
+    /* @end-chisel-passkeys */
 
     $user = User::factory()->create();
 
