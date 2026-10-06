@@ -1,5 +1,6 @@
 import { LayoutList } from 'lucide-react';
 import type { ReactNode } from 'react';
+
 import EmptyState from '@/components/empty-state';
 import Section from '@/components/sections/section';
 import { cn } from '@/lib/utils';

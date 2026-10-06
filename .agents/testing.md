@@ -96,7 +96,7 @@ journey-shaped.
 ## Commands
 
 - composer run test — config clear, Pint check, PHPStan, full Pest suite.
-- composer run ci:check — the contract: adds ESLint, Prettier, tsc, fallow, soak.
+- composer run ci:check — the contract: adds Oxlint, Oxfmt, tsc, fallow, soak.
 - php artisan test --compact --filter=Note — the fast loop while iterating.
 
 ## What not to do

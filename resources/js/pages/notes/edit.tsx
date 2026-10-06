@@ -1,4 +1,5 @@
 import { usePage } from '@inertiajs/react';
+
 import NoteController from '@/actions/App/Http/Controllers/Notes/NoteController';
 import Heading from '@/components/heading';
 import { noteBreadcrumbs } from '@/components/notes/note-breadcrumbs';

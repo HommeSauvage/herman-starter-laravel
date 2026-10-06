@@ -7,6 +7,7 @@ import {
     Users,
     Workflow,
 } from 'lucide-react';
+
 import CtaBand from '@/components/sections/cta-band';
 import type { FaqItem } from '@/components/sections/faq';
 import Faq from '@/components/sections/faq';

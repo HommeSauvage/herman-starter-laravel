@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
+
 import MarkdownBody from '@/components/markdown-body';
 import MediaImage from '@/components/media-image';
 import Seo from '@/components/seo';

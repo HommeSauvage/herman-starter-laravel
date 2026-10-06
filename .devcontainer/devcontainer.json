@@ -8,8 +8,7 @@
             "extensions": [
                 "laravel.vscode-laravel",
                 "bmewburn.vscode-intelephense-client",
-                "dbaeumer.vscode-eslint",
-                "esbenp.prettier-vscode",
+                "oxc.oxc-vscode",
                 "bradlc.vscode-tailwindcss"
             ]
         }

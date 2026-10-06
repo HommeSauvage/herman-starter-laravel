@@ -90,7 +90,7 @@ its routes register automatically. Team-scoped routes live under `{current_team}
 | Command | Purpose |
 |---|---|
 | `composer run dev` | PHP server, queue, logs, Vite |
-| `composer run ci:check` | ESLint, Prettier, `tsc`, fallow, Pint, PHPStan, Pest — the gate |
+| `composer run ci:check` | Oxlint, Oxfmt, `tsc`, fallow, Pint, PHPStan, Pest — the gate |
 | `composer run agent:report` | One JSON line: tests, soak, routes, boot memory |
 | `composer run modules` | One JSON line: optional-module state and residue |
 | `composer run chisel` | Remove optional modules |

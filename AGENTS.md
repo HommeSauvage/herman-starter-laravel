@@ -16,7 +16,7 @@ Laravel 13 / PHP 8.5 / Inertia v3 + React 19 / Tailwind v4 / Pest 4. Create file
 
 ## Gates
 
-- `composer run ci:check` — ESLint, Prettier, `tsc`, fallow, Pint, PHPStan, Pest, soak; the lefthook hook runs exactly this. Never use `--no-verify`.
+- `composer run ci:check` — Oxlint, Oxfmt, `tsc`, fallow, Pint, PHPStan, Pest, soak; the lefthook hook runs exactly this. Never use `--no-verify`.
 - `composer run modules` — optional-module integrity; `php artisan test` enforces it. Never answer a finding by widening `.fallowrc.jsonc`, deleting the test, or ignoring the file.
 - `composer run agent:report` — one JSON line (tests, soak, modules, routes, boot memory).
 - Feature tests by default, models via factories; never delete tests without approval.

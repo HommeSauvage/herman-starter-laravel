@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+
 import { show } from '@/routes/notes';
 
 export type NoteListItem = {

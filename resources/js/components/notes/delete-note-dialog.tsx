@@ -1,4 +1,5 @@
 import { Form, usePage } from '@inertiajs/react';
+
 import NoteController from '@/actions/App/Http/Controllers/Notes/NoteController';
 import { Button } from '@/components/ui/button';
 import {

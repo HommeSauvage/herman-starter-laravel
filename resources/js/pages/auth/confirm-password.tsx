@@ -1,4 +1,5 @@
 import { Form } from '@inertiajs/react';
+
 /* @chisel-passkeys */
 import {
     index as confirmOptions,

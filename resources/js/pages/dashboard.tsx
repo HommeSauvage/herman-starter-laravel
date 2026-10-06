@@ -1,6 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import { MailPlus, NotebookPen, Plus, Users } from 'lucide-react';
 import { useState } from 'react';
+
 import EmptyState from '@/components/empty-state';
 import NoteList from '@/components/notes/note-list';
 import type { NoteListItem } from '@/components/notes/note-list';

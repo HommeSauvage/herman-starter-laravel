@@ -134,7 +134,7 @@ class ChiselCommand extends Command
         }
 
         if (! Process::path(base_path())->run(['bun', 'run', 'format'])->successful()) {
-            $this->components->warn('Prettier failed — run `bun run format` before committing.');
+            $this->components->warn('Oxfmt failed — run `bun run format` before committing.');
         }
     }
 

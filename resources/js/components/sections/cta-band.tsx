@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+
 import Section from '@/components/sections/section';
 import type { SectionAction } from '@/components/sections/section';
 import { Button } from '@/components/ui/button';

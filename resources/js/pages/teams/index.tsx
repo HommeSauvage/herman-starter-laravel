@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { Eye, LogOut, Pencil, Plus } from 'lucide-react';
 import { useState } from 'react';
+
 import CreateTeamModal from '@/components/create-team-modal';
 import Heading from '@/components/heading';
 import LeaveTeamModal from '@/components/leave-team-modal';

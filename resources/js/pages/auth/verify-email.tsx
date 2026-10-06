@@ -1,5 +1,6 @@
 // Components
 import { Form } from '@inertiajs/react';
+
 import Seo from '@/components/seo';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';

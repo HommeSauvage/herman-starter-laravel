@@ -1,5 +1,6 @@
 import { router, usePage } from '@inertiajs/react';
 import { Check, ChevronsUpDown, Plus, Users } from 'lucide-react';
+
 import CreateTeamModal from '@/components/create-team-modal';
 import { Button } from '@/components/ui/button';
 import {

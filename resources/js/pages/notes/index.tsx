@@ -1,5 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import { NotebookPen, Plus } from 'lucide-react';
+
 import EmptyState from '@/components/empty-state';
 import Heading from '@/components/heading';
 import NoteList from '@/components/notes/note-list';

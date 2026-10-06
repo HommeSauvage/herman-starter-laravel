@@ -1,5 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import { Pencil } from 'lucide-react';
+
 import MarkdownBody from '@/components/markdown-body';
 import DeleteNoteDialog from '@/components/notes/delete-note-dialog';
 import { noteBreadcrumbs } from '@/components/notes/note-breadcrumbs';

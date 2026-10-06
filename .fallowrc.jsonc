@@ -5,8 +5,7 @@
     "entry": [
         "resources/js/app.tsx",
         "resources/css/app.css",
-        "vite.config.ts",
-        "eslint.config.js"
+        "vite.config.ts"
     ],
     "dynamicallyLoaded": [
         "resources/js/pages/**/*.tsx"
@@ -26,8 +25,6 @@
         "@inertiajs/core",
         // Used by `php artisan dev` (Laravel's DevCommand shells out to it).
         "concurrently",
-        // Referenced by name in eslint.config.js resolver settings.
-        "eslint-import-resolver-typescript",
         // Platform-specific build binaries used only on CI matrices.
         "@rollup/rollup-linux-x64-gnu",
         "@rollup/rollup-win32-x64-msvc",

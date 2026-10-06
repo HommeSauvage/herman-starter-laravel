@@ -1,4 +1,5 @@
 import { Globe, LayoutGrid, NotebookPen } from 'lucide-react';
+
 import { dashboard, home } from '@/routes';
 import { index as notesIndex } from '@/routes/notes';
 import { index as postsIndex } from '@/routes/posts';

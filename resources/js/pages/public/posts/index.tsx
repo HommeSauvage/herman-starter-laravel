@@ -1,4 +1,5 @@
 import { usePage } from '@inertiajs/react';
+
 import Pagination from '@/components/pagination';
 import type { CardGridItem } from '@/components/sections/card-grid';
 import CardGrid from '@/components/sections/card-grid';

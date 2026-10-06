@@ -1,6 +1,7 @@
 // Components
 import { Form } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
+
 import InputError from '@/components/input-error';
 import Seo from '@/components/seo';
 import TextLink from '@/components/text-link';

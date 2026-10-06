@@ -1,4 +1,5 @@
 import { ChartColumn } from 'lucide-react';
+
 import EmptyState from '@/components/empty-state';
 import Section from '@/components/sections/section';
 import { cn } from '@/lib/utils';

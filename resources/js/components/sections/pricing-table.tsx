@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { Check, Tag } from 'lucide-react';
+
 import EmptyState from '@/components/empty-state';
 import Section from '@/components/sections/section';
 import type { SectionAction } from '@/components/sections/section';

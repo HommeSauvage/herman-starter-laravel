@@ -1,4 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
+
 import Seo from '@/components/seo';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';

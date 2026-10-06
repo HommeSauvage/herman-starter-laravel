@@ -1,6 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import { Menu } from 'lucide-react';
 import type { ReactNode } from 'react';
+
 import AppLogoIcon from '@/components/app-logo-icon';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,13 +23,17 @@ import { dashboard, home, login, register } from '@/routes';
  * Applied automatically to every page in `resources/js/pages/public/` —
  * see the layout resolver in `resources/js/app.tsx`. Never wrap a public
  * page in AppLayout.
+ *
+ * The copyright year is read once at module scope: `new Date()` is impure, so
+ * calling it while rendering trips `react/purity`.
  */
+const currentYear = new Date().getFullYear();
+
 export default function PublicLayout({ children }: { children: ReactNode }) {
     const { name, auth, currentTeam } = usePage().props;
     const { isCurrentUrl } = useCurrentUrl();
 
     const dashboardUrl = currentTeam ? dashboard(currentTeam.slug) : null;
-    const year = new Date().getFullYear();
 
     const authActions = (
         <>
@@ -242,7 +247,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
                 <div className="border-t">
                     <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 text-xs text-muted-foreground md:px-6">
                         <span>
-                            © {year} {name}. All rights reserved.
+                            © {currentYear} {name}. All rights reserved.
                         </span>
                     </div>
                 </div>

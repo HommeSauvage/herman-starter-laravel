@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { LayoutGrid } from 'lucide-react';
 import type { ReactNode } from 'react';
+
 import EmptyState from '@/components/empty-state';
 import MediaImage from '@/components/media-image';
 import Section from '@/components/sections/section';

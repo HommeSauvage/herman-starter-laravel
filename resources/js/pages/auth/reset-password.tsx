@@ -1,4 +1,5 @@
 import { Form } from '@inertiajs/react';
+
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import Seo from '@/components/seo';

@@ -1,5 +1,6 @@
 import { Form, Link } from '@inertiajs/react';
 import { useState } from 'react';
+
 import InputError from '@/components/input-error';
 import MarkdownEditor from '@/components/notes/markdown-editor';
 import { Button } from '@/components/ui/button';
